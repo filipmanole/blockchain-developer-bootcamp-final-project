@@ -145,24 +145,16 @@ describe("Swapper Contract", () => {
 
   it("should withdraw accumulated fees", async () => {
     /* Get ammount of DT0 hold by the swapper owner */
-    const swapperDT0: BigNumber = await DT0.balanceOf(owner.address);
-
-    const path: string[] = [DT0.address, DT1.address];
-    const [amountIn, amountOut] = await swapper.connect(trader).getAmountsOut(50, path);
-
-    /* Perform the swap as trader */
-    tx = await swapper.connect(trader).swap(DT0.address, DT1.address, amountIn, amountOut);
-    await tx.wait();
+    const swapperDT0: BigNumber = await DT0.balanceOf(swapper.address);
 
     /* Withdraw the accumulated fee */
     tx = await swapper.withdraw();
     await tx.wait();
 
     /* Calculate the new expected DT0 balnce for the owner */
-    const newSwapperDT0: BigNumber = await DT0.balanceOf(owner.address);
-    const oldBalancePlusFee = swapperDT0.add(amountIn.mul(0.1));
+    const ownerDT0: BigNumber = await DT0.balanceOf(owner.address);
     
-    expect(newSwapperDT0.eq(oldBalancePlusFee)).to.be.true;
+    expect(swapperDT0.eq(ownerDT0)).to.be.true;
   });
 
   it("should emit Withdrawn event", async () => {
