@@ -171,17 +171,27 @@ describe("Swapper Contract", () => {
   });
 
   it("should withdraw accumulated fees", async () => {
-    /* Get ammount of DT0 hold by the swapper owner */
+    /* Get ammount of tokens hold by the swapper owner */
+    const ownerDT0: BigNumber = await DT0.balanceOf(owner.address);
+    const ownerDT1: BigNumber = await DT1.balanceOf(owner.address);
+
+    /* Get ammount of tokens hold by the swapper contract */
     const swapperDT0: BigNumber = await DT0.balanceOf(swapper.address);
+    const swapperDT1: BigNumber = await DT1.balanceOf(swapper.address);
+
+    /* For a proper withdraw test, one of the amount should be different than 0 */
+    expect(swapperDT0.eq(0) && swapperDT1.eq(0)).to.be.false;
 
     /* Withdraw the accumulated fee */
     tx = await swapper.withdraw();
     await tx.wait();
 
-    /* Calculate the new expected DT0 balnce for the owner */
-    const ownerDT0: BigNumber = await DT0.balanceOf(owner.address);
+    /* Get new ammount of tokens hold by the swapper owner */
+    const newOwnerDT0: BigNumber = await DT0.balanceOf(owner.address);
+    const newOwnerDT1: BigNumber = await DT1.balanceOf(owner.address);
 
-    expect(swapperDT0.eq(ownerDT0)).to.be.true;
+    expect(newOwnerDT0.eq(ownerDT0.add(swapperDT0))).to.be.true;
+    expect(newOwnerDT1.eq(ownerDT1.add(swapperDT1))).to.be.true;
   });
 
   it("should emit Withdrawn event", async () => {
