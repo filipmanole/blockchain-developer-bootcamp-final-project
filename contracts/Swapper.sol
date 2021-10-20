@@ -8,7 +8,7 @@ import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 import '@uniswap/v2-periphery/contracts/interfaces/IERC20.sol';
 import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
 
-contract Swapper is Ownable { 
+contract Swapper is Ownable {
   uint private tokensLen;
   mapping(uint => address) private tokens;
   mapping(address => bool) private exist;
@@ -19,6 +19,7 @@ contract Swapper is Ownable {
 
   event PairAdded(uint token0amount, uint token1amount, uint liquidity);
   event SwappedExactInput();
+  event SwappedExactOutput();
   event Withdrawn();
 
   constructor(address _factory, address _router) {
@@ -37,6 +38,14 @@ contract Swapper is Ownable {
     exist[token] = true;
   }
 
+  function subFee(uint amount) public pure returns(uint) {
+    return amount - amount / 1000;
+  }
+
+  function addFee(uint amount) public pure returns(uint) {
+    return 1000 * amount / 999;
+  }
+
   function addLiquidity(address token0, uint token0amount, address token1, uint token1amount) public {
     require(IERC20(token0).transferFrom(msg.sender, address(this), token0amount), 'transfer failed');
     require(IERC20(token1).transferFrom(msg.sender, address(this), token1amount), 'transfer failed');
@@ -53,17 +62,35 @@ contract Swapper is Ownable {
   function swapExactTokensIn(address tokenIn, address tokenOut, uint amountIn, uint amountOutMin) public {
     require(IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn), 'transfer failed');
 
-    uint newAmountIn = amountIn * 9 / 10;
+    uint newAmountIn = subFee(amountIn);
+
     require(IERC20(tokenIn).approve(address(router), newAmountIn), 'approve failed');
     
     address[] memory path = new address[](2);
     path[0] = tokenIn;
     path[1] = tokenOut;
     router.swapExactTokensForTokens(newAmountIn, amountOutMin, path, msg.sender, block.timestamp);
-  
+
     markToken(tokenIn);
 
     emit SwappedExactInput();
+  }
+
+  function swapExactTokensOut(address tokenIn, address tokenOut, uint amountInMax, uint amountOut) public {
+    require(IERC20(tokenIn).transferFrom(msg.sender, address(this), amountInMax), 'transfer failed');
+
+    uint newAmountInMax = subFee(amountInMax);
+    require(IERC20(tokenIn).approve(address(router), newAmountInMax), 'approve failed');
+    
+    address[] memory path = new address[](2);
+    path[0] = tokenIn;
+    path[1] = tokenOut;
+
+    router.swapTokensForExactTokens(amountOut, newAmountInMax, path, msg.sender, block.timestamp);
+
+    markToken(tokenIn);
+
+    emit SwappedExactOutput();
   }
 
   function withdraw() onlyOwner public {
@@ -80,7 +107,7 @@ contract Swapper is Ownable {
   }
 
   function getAmountsOut(uint amountIn, address[] memory path) public view returns (uint[] memory amounts) {
-    uint[] memory _amounts =  router.getAmountsOut(amountIn * 9 / 10, path);
+    uint[] memory _amounts =  router.getAmountsOut(subFee(amountIn), path);
     _amounts[0] = amountIn;
 
     return _amounts;
@@ -88,7 +115,7 @@ contract Swapper is Ownable {
 
   function getAmountsIn(uint amountOut, address[] memory path) public view returns (uint[] memory amounts) {
     uint[] memory _amounts = router.getAmountsIn(amountOut, path);
-    _amounts[0] = _amounts[0] + _amounts[0] / 10;
+    _amounts[0] = addFee(_amounts[0]);
     
     return _amounts;
   }
