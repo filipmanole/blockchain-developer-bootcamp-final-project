@@ -94,15 +94,25 @@ describe("Swapper Contract", () => {
   });
 
   it("should emit PairAdded event", async ()=> {
+    const DT0amount: BigNumber = expand(500);
+    const DT1amount: BigNumber = expand(500);
+
+    const providerDT0: BigNumber = await DT0.balanceOf(provider.address);
+    const providerDT1: BigNumber = await DT1.balanceOf(provider.address);
+
+    /* Provider should hold the needed DT0 and DT1 amounts to add a pair */
+    expect(providerDT0.gte(DT0amount)).to.be.true;
+    expect(providerDT1.gte(DT1amount)).to.be.true;
+
     /* Approve swapper contract to use the DT0 and DT1 amount of the pair */
-    tx = await DT0.connect(provider).approve(swapper.address, expand(500));
+    tx = await DT0.connect(provider).approve(swapper.address, DT0amount);
     await tx.wait();
-    tx = await DT1.connect(provider).approve(swapper.address, expand(500));
+    tx = await DT1.connect(provider).approve(swapper.address, DT1amount);
     await tx.wait();
 
     /* Provider should add a pair of (DT0, DT1) in the pool */
     await expect(
-      swapper.connect(provider).addLiquidity(DT0.address, expand(500), DT1.address, expand(500))
+      swapper.connect(provider).addLiquidity(DT0.address, DT0amount, DT1.address, DT1amount)
     ).to.emit(swapper, "PairAdded");
   });
 
@@ -113,19 +123,25 @@ describe("Swapper Contract", () => {
     expect(numberOfPairs.eq(1)).to.be.true;
   });
 
-  it("should exchange DT0 for DT1", async () => {
-    /* Get the received amount of DT1 when swapping 50 DT0 into DT1 */
+  it("should exchange DT0 for DT1, specifying input token amount", async () => {
+    const inputAmount: BigNumber = expand(50);
+
+    /* Get the received amount of DT1 when swapping an exact amount of DT0 into DT1 */
     const path: string[] = [DT0.address, DT1.address];
-    const [amountIn, amountOut] = await swapper.connect(trader).getAmountsOut(expand(50), path);
+    const [amountIn, amountOut] = await swapper.connect(trader).getAmountsOut(inputAmount, path);
     
     /* Get trader's balances */
     const traderDT0: BigNumber = await DT0.balanceOf(trader.address);
     const traderDT1: BigNumber = await DT1.balanceOf(trader.address);
 
+    /* Trader should hold the required number of DT0 token */
+    expect(traderDT0.gte(amountIn)).to.be.true;
+
+    /* Approve swapper to use the trader's tokens */
     tx = await DT0.connect(trader).approve(swapper.address, amountIn);
     await tx.wait();
 
-    /* Swap 50 DT0 into DT1 */
+    /* Swap exact DT0 into DT1 */
     tx = await swapper.connect(trader).swapExactTokensIn(DT0.address, DT1.address, amountIn, amountOut);
     await tx.wait();
 
@@ -142,16 +158,80 @@ describe("Swapper Contract", () => {
   });
 
   it("should emit SwappedExactInput event", async () => {
-    /* Get the received amount of DT1 when swapping 10 DT0 into DT1 */
-    const path: string[] = [DT0.address, DT1.address];
-    const [amountIn, amountOut] = await swapper.connect(trader).getAmountsOut(expand(10), path);
+    const inputAmount: BigNumber = expand(10);
 
+    /* Get the received amount of DT1 when swapping an exact amount of DT0 into DT1 */
+    const path: string[] = [DT0.address, DT1.address];
+    const [amountIn, amountOut] = await swapper.connect(trader).getAmountsOut(inputAmount, path);
+
+    /* Get trader's DT0 balance */
+    const traderDT0: BigNumber = await DT0.balanceOf(trader.address);
+
+    /* Trader should hold the required number of DT0 token */
+    expect(traderDT0.gte(amountIn)).to.be.true;
+
+    /* Approve swapper to use the trader's tokens */
     tx = await DT0.connect(trader).approve(swapper.address, amountIn);
     await tx.wait();
 
     await expect(
       swapper.connect(trader).swapExactTokensIn(DT0.address, DT1.address, amountIn, amountOut)
     ).to.emit(swapper, "SwappedExactInput");
+  });
+
+  it("should exchange DT0 for DT1, specifying output token amount", async () => {
+    const outputAmount: BigNumber = expand(10);
+
+    /* Get the input amount of DT0 when swapping into an exact amount of DT1 */
+    const path: string[] = [DT0.address, DT1.address];
+    const [amountIn, amountOut] = await swapper.connect(trader).getAmountsIn(outputAmount, path);
+    
+    /* Get trader's balances */
+    const traderDT0: BigNumber = await DT0.balanceOf(trader.address);
+    const traderDT1: BigNumber = await DT1.balanceOf(trader.address);
+
+    /* Trader should hold the required number of DT0 token */
+    expect(traderDT0.gte(amountIn)).to.be.true;
+
+    /* Approve swapper to use the trader's tokens */
+    tx = await DT0.connect(trader).approve(swapper.address, amountIn);
+    await tx.wait();
+
+    tx = await swapper.connect(trader).swapExactTokensOut(DT0.address, DT1.address, amountIn, amountOut);
+    await tx.wait();
+
+    /* Get trader's balances after performing the swap */
+    const newTraderDT0: BigNumber = await DT0.balanceOf(trader.address);
+    const newTraderDT1: BigNumber = await DT1.balanceOf(trader.address);
+
+    /* Calculate expected balances */
+    const expectedDT0: BigNumber = traderDT0.sub(amountIn);
+    const expectedDT1: BigNumber = traderDT1.add(amountOut);
+
+    expect(newTraderDT0.eq(expectedDT0)).to.be.true;
+    expect(newTraderDT1.eq(expectedDT1)).to.be.true;
+  });
+
+  it("should emit SwappedExactOutput event", async () => {
+    const outputAmount: BigNumber = expand(10);
+
+    /* Get the input amount of DT0 when swapping into an exact amount of DT1 */
+    const path: string[] = [DT0.address, DT1.address];
+    const [amountIn, amountOut] = await swapper.connect(trader).getAmountsIn(outputAmount, path);
+
+    /* Get trader's balances */
+    const traderDT0: BigNumber = await DT0.balanceOf(trader.address);
+
+    /* Trader should hold the required number of DT0 token */
+    expect(traderDT0.gte(amountIn)).to.be.true;
+
+    /* Approve swapper to use the trader's tokens */
+    tx = await DT0.connect(trader).approve(swapper.address, amountIn);
+    await tx.wait();
+
+    await expect(
+      swapper.connect(trader).swapExactTokensOut(DT0.address, DT1.address, amountIn, amountOut)
+    ).to.emit(swapper, "SwappedExactOutput");
   });
 
   it("should not withdraw if not the owner", async () => {
