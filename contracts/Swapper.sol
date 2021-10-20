@@ -18,7 +18,7 @@ contract Swapper is Ownable {
   IWETH public immutable WETH;
 
   event PairAdded(uint token0amount, uint token1amount, uint liquidity);
-  event Swapped();
+  event SwappedExactInput();
   event Withdrawn();
 
   constructor(address _factory, address _router) {
@@ -50,7 +50,7 @@ contract Swapper is Ownable {
     emit PairAdded(amount0, amount1, liquidity);
   }
 
-  function swap(address tokenIn, address tokenOut, uint amountIn, uint amountOutMin) public {
+  function swapExactTokensIn(address tokenIn, address tokenOut, uint amountIn, uint amountOutMin) public {
     require(IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn), 'transfer failed');
 
     uint newAmountIn = amountIn * 9 / 10;
@@ -63,7 +63,7 @@ contract Swapper is Ownable {
   
     markToken(tokenIn);
 
-    emit Swapped();
+    emit SwappedExactInput();
   }
 
   function withdraw() onlyOwner public {

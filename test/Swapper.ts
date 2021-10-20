@@ -126,7 +126,7 @@ describe("Swapper Contract", () => {
     await tx.wait();
 
     /* Swap 50 DT0 into DT1 */
-    tx = await swapper.connect(trader).swap(DT0.address, DT1.address, amountIn, amountOut);
+    tx = await swapper.connect(trader).swapExactTokensIn(DT0.address, DT1.address, amountIn, amountOut);
     await tx.wait();
 
     /* Get trader's balances after performing the swap */
@@ -141,7 +141,7 @@ describe("Swapper Contract", () => {
     expect(newTraderDT1.eq(expectedDT1)).to.be.true;
   });
 
-  it("should emit Swapped event", async () => {
+  it("should emit SwappedExactInput event", async () => {
     /* Get the received amount of DT1 when swapping 10 DT0 into DT1 */
     const path: string[] = [DT0.address, DT1.address];
     const [amountIn, amountOut] = await swapper.connect(trader).getAmountsOut(expand(10), path);
@@ -150,8 +150,8 @@ describe("Swapper Contract", () => {
     await tx.wait();
 
     await expect(
-      swapper.connect(trader).swap(DT0.address, DT1.address, amountIn, amountOut)
-    ).to.emit(swapper, "Swapped");
+      swapper.connect(trader).swapExactTokensIn(DT0.address, DT1.address, amountIn, amountOut)
+    ).to.emit(swapper, "SwappedExactInput");
   });
 
   it("should not withdraw if not the owner", async () => {
