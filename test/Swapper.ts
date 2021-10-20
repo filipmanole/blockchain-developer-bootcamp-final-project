@@ -290,6 +290,72 @@ describe("Swapper Contract", () => {
     expect(traderDT1.eq(newTraderDT1)).to.be.true;
   });
 
+  it("should keep 0.1% fee when swapExactTokensIn is called", async () => {
+    const inputAmount: BigNumber = expand(10);
+
+    /* Get the received amount of DT1 when swapping an exact amount of DT0 into DT1 */
+    const path: string[] = [DT0.address, DT1.address];
+    const [amountIn, amountOut] = await swapper.connect(trader).getAmountsOut(inputAmount, path);
+    
+    /* Get swapper's DT0 balance */
+    const swapperDT0: BigNumber = await DT0.balanceOf(swapper.address);
+
+    /* Get trader's DT0 balances */
+    const traderDT0: BigNumber = await DT0.balanceOf(trader.address);
+    
+    /* Trader should hold the required number of DT0 token */
+    expect(traderDT0.gte(amountIn)).to.be.true;
+
+    /* Approve swapper to use the trader's tokens */
+    tx = await DT0.connect(trader).approve(swapper.address, amountIn);
+    await tx.wait();
+
+    /* Swap exact DT0 into DT1 */
+    tx = await swapper.connect(trader).swapExactTokensIn(DT0.address, DT1.address, amountIn, amountOut);
+    await tx.wait();
+
+    /* Get swapper's new DT0 balance */
+    const newSwapperDT0: BigNumber = await DT0.balanceOf(swapper.address);
+
+    /* Calculate expected balances */
+    const fee = amountIn.div(1000);
+
+    expect(newSwapperDT0.eq(swapperDT0.add(fee))).to.be.true;
+  });
+
+  it("should keep 0.1% fee when swapExactTokensOut is called", async () => {
+    const outputAmount: BigNumber = expand(10);
+
+    /* Get the received amount of DT1 when swapping an exact amount of DT0 into DT1 */
+    const path: string[] = [DT0.address, DT1.address];
+    const [amountIn, amountOut] = await swapper.connect(trader).getAmountsIn(outputAmount, path);
+    
+    /* Get swapper's DT0 balance */
+    const swapperDT0: BigNumber = await DT0.balanceOf(swapper.address);
+
+    /* Get trader's DT0 balances */
+    const traderDT0: BigNumber = await DT0.balanceOf(trader.address);
+    
+    /* Trader should hold the required number of DT0 token */
+    expect(traderDT0.gte(amountIn)).to.be.true;
+
+    /* Approve swapper to use the trader's tokens */
+    tx = await DT0.connect(trader).approve(swapper.address, amountIn);
+    await tx.wait();
+
+    /* Swap exact DT0 into DT1 */
+    tx = await swapper.connect(trader).swapExactTokensOut(DT0.address, DT1.address, amountIn, amountOut);
+    await tx.wait();
+
+    /* Get swapper's new DT0 balance */
+    const newSwapperDT0: BigNumber = await DT0.balanceOf(swapper.address);
+
+    /* Calculate expected balances */
+    const fee = amountIn.div(1000);
+
+    expect(newSwapperDT0.eq(swapperDT0.add(fee))).to.be.true;
+  });
+
   it("should not withdraw if not the owner", async () => {
     /* Get trader's balances */
     const traderDT0: BigNumber = await DT0.balanceOf(trader.address);
