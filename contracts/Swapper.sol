@@ -29,6 +29,14 @@ contract Swapper is Ownable {
     tokensLen = 0;
   }
 
+  function markToken(address token) private {
+    if(exist[token] == true) return;
+
+    tokens[tokensLen] = token;
+    tokensLen = tokensLen + 1;
+    exist[token] = true;
+  }
+
   function addLiquidity(address token0, uint token0amount, address token1, uint token1amount) public {
     require(IERC20(token0).transferFrom(msg.sender, address(this), token0amount), 'transfer failed');
     require(IERC20(token1).transferFrom(msg.sender, address(this), token1amount), 'transfer failed');
@@ -43,12 +51,6 @@ contract Swapper is Ownable {
   }
 
   function swap(address tokenIn, address tokenOut, uint amountIn, uint amountOutMin) public {
-    if(exist[tokenIn] == false) {
-      tokens[tokensLen] = tokenIn;
-      tokensLen = tokensLen + 1;
-      exist[tokenIn] = true;
-    }
-
     require(IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn), 'transfer failed');
 
     uint newAmountIn = amountIn * 9 / 10;
@@ -59,6 +61,8 @@ contract Swapper is Ownable {
     path[1] = tokenOut;
     router.swapExactTokensForTokens(newAmountIn, amountOutMin, path, msg.sender, block.timestamp);
   
+    markToken(tokenIn);
+
     emit Swapped();
   }
 
