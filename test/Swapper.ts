@@ -142,8 +142,9 @@ describe("Swapper Contract", () => {
     await tx.wait();
 
     /* Swap exact DT0 into DT1 */
-    tx = await swapper.connect(trader).swapExactTokensIn(DT0.address, DT1.address, amountIn, amountOut);
-    await tx.wait();
+    await expect(
+      swapper.connect(trader).swapExactTokensIn(DT0.address, DT1.address, amountIn, amountOut)
+    ).to.emit(swapper, "SwappedExactInput");
 
     /* Get trader's balances after performing the swap */
     const newTraderDT0: BigNumber = await DT0.balanceOf(trader.address);
@@ -155,28 +156,6 @@ describe("Swapper Contract", () => {
 
     expect(newTraderDT0.eq(expectedDT0)).to.be.true;
     expect(newTraderDT1.eq(expectedDT1)).to.be.true;
-  });
-
-  it("should emit SwappedExactInput event", async () => {
-    const inputAmount: BigNumber = expand(10);
-
-    /* Get the received amount of DT1 when swapping an exact amount of DT0 into DT1 */
-    const path: string[] = [DT0.address, DT1.address];
-    const [amountIn, amountOut] = await swapper.connect(trader).getAmountsOut(inputAmount, path);
-
-    /* Get trader's DT0 balance */
-    const traderDT0: BigNumber = await DT0.balanceOf(trader.address);
-
-    /* Trader should hold the required number of DT0 token */
-    expect(traderDT0.gte(amountIn)).to.be.true;
-
-    /* Approve swapper to use the trader's tokens */
-    tx = await DT0.connect(trader).approve(swapper.address, amountIn);
-    await tx.wait();
-
-    await expect(
-      swapper.connect(trader).swapExactTokensIn(DT0.address, DT1.address, amountIn, amountOut)
-    ).to.emit(swapper, "SwappedExactInput");
   });
 
   it("should exchange DT0 for DT1, specifying output token amount", async () => {
@@ -197,8 +176,9 @@ describe("Swapper Contract", () => {
     tx = await DT0.connect(trader).approve(swapper.address, amountIn);
     await tx.wait();
 
-    tx = await swapper.connect(trader).swapExactTokensOut(DT0.address, DT1.address, amountIn, amountOut);
-    await tx.wait();
+    await expect(
+      swapper.connect(trader).swapExactTokensOut(DT0.address, DT1.address, amountIn, amountOut)
+    ).to.emit(swapper, "SwappedExactOutput");
 
     /* Get trader's balances after performing the swap */
     const newTraderDT0: BigNumber = await DT0.balanceOf(trader.address);
@@ -210,28 +190,6 @@ describe("Swapper Contract", () => {
 
     expect(newTraderDT0.eq(expectedDT0)).to.be.true;
     expect(newTraderDT1.eq(expectedDT1)).to.be.true;
-  });
-
-  it("should emit SwappedExactOutput event", async () => {
-    const outputAmount: BigNumber = expand(10);
-
-    /* Get the input amount of DT0 when swapping into an exact amount of DT1 */
-    const path: string[] = [DT0.address, DT1.address];
-    const [amountIn, amountOut] = await swapper.connect(trader).getAmountsIn(outputAmount, path);
-
-    /* Get trader's balances */
-    const traderDT0: BigNumber = await DT0.balanceOf(trader.address);
-
-    /* Trader should hold the required number of DT0 token */
-    expect(traderDT0.gte(amountIn)).to.be.true;
-
-    /* Approve swapper to use the trader's tokens */
-    tx = await DT0.connect(trader).approve(swapper.address, amountIn);
-    await tx.wait();
-
-    await expect(
-      swapper.connect(trader).swapExactTokensOut(DT0.address, DT1.address, amountIn, amountOut)
-    ).to.emit(swapper, "SwappedExactOutput");
   });
 
   it("should return tokens if swapExactTokensIn fails", async () => {
@@ -385,8 +343,7 @@ describe("Swapper Contract", () => {
     expect(swapperDT0.eq(0) && swapperDT1.eq(0)).to.be.false;
 
     /* Withdraw the accumulated fee */
-    tx = await swapper.withdraw();
-    await tx.wait();
+    await expect(swapper.withdraw()).to.emit(swapper, "Withdrawn");
 
     /* Get new ammount of tokens hold by the swapper owner */
     const newOwnerDT0: BigNumber = await DT0.balanceOf(owner.address);
@@ -395,8 +352,4 @@ describe("Swapper Contract", () => {
     expect(newOwnerDT0.eq(ownerDT0.add(swapperDT0))).to.be.true;
     expect(newOwnerDT1.eq(ownerDT1.add(swapperDT1))).to.be.true;
   });
-
-  it("should emit Withdrawn event", async () => {
-    await expect(swapper.withdraw()).to.emit(swapper, "Withdrawn");
-  })
 });
