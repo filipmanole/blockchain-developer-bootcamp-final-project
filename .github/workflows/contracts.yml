@@ -17,12 +17,13 @@ on:
 
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: hardhat
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      working-directory: ./hardhat
 
     steps:
       - uses: actions/checkout@v2
