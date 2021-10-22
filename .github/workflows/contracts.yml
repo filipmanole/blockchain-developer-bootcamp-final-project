@@ -5,14 +5,24 @@ on:
     branches:
       - '**'
     paths:
-      - 'test/**'
-      - 'contracts/**'
+      - 'hardhat/test/**'
+      - 'hardhat/contracts/**'
+
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'hardhat/test/**'
+      - 'hardhat/contracts/**'
 
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      working-directory: ./hardhat
 
     steps:
       - uses: actions/checkout@v2
@@ -21,9 +31,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '14'
-
-      - name: Change directory
-        run: cd hardhat
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
