@@ -1,14 +1,25 @@
-name: CI
+name: Contract Tests
 
 on:
   push:
     branches:
       - '**'
     paths:
-      - 'test/**'
-      - 'contracts/**'
+      - 'hardhat/test/**'
+      - 'hardhat/contracts/**'
+
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'hardhat/test/**'
+      - 'hardhat/contracts/**'
 
   workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: hardhat
 
 jobs:
   build:
