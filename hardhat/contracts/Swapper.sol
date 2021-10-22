@@ -164,6 +164,7 @@ contract Swapper is Ownable {
       delete exist[tokens[i]];
       delete tokens[i];
     }
+
     tokensLen = 0;
 
     emit Withdrawn();
