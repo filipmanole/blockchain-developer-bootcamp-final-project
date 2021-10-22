@@ -1,8 +1,8 @@
 {
-  "editor.formatOnSave": true,
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "[solidity]": {
+    "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "solidity.packageDefaultDependenciesDirectory": "hardhat/node_modules"
