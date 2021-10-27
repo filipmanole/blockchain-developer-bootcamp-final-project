@@ -8,7 +8,17 @@ import '@nomiclabs/hardhat-waffle';
 export default {
   networks: {
     hardhat: {
-      chainId: 1337
+      chainId: 1337,
+      accounts: [
+        {
+          privateKey: "0x0000000000000000000000000000000000000000000000000000000000000001",
+          balance: "100000000000000000000",
+        },
+        {
+          privateKey: "0x0000000000000000000000000000000000000000000000000000000000000002",
+          balance: "100000000000000000000",
+        },
+      ]
     }
   },
   solidity: {
