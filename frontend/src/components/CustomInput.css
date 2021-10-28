@@ -11,11 +11,11 @@
   font-family: Monospace;
   font-size: 20px;
   font-weight: bold;
-  width: 100%;
   margin: 10px;
   background: rgba(0, 0, 0, 0);
   border: 0;
   color: white;
+  flex: 1 1 auto;
 }
 
 #amount-input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
@@ -25,4 +25,17 @@
 
 #amount-input:focus {
   outline: none;
+}
+
+#select-modal:focus {
+  outline: none;
+}
+
+#content-button {
+  font-family: Monospace;
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  border-radius: 10px;
 }
