@@ -14,12 +14,12 @@
   margin: 10px;
   background: rgba(0, 0, 0, 0);
   border: 0;
-  color: white;
+  /* color: white; */
   flex: 1 1 auto;
 }
 
 #amount-input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: white;
+  /* color: white; */
   opacity: 1; /* Firefox */
 }
 

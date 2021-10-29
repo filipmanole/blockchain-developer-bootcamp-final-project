@@ -1,0 +1,46 @@
+#swap-window {
+  /* display: flex;
+  flex-direction: column;
+  align-items: center; */
+
+  display: grid;
+  grid-auto-rows: auto;
+  row-gap: 8px;
+
+  /* background-color: aliceblue; */
+  padding: 5px;
+  border-radius: 10px;
+  width: 800px;
+}
+
+#swap-window > * {
+  margin: 5px;
+}
+
+#outer-test {
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+}
+
+#test {
+  background-color: red;
+  
+  
+  display: flex;
+  justify-content: center;
+
+  position: relative;
+  top: -20px;
+}
+
+#arrow-div {
+  padding: 5px;
+  background-color: rgb(46, 138, 214); /*TODO*/
+  border-color: aliceblue;
+  border-radius: 5px;
+  border-width: 10px;
+  border: 8px solid aliceblue;
+
+  z-index: 1;
+}

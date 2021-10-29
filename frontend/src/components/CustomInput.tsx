@@ -18,7 +18,6 @@ export interface ICustomInput {
 const boxStyle = {
   display: 'flex',
   alignItems: 'center',
-  backgroundColor: 'primary.dark',
   borderRadius: 4,
   p: 1,
 };
