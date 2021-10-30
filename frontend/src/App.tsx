@@ -1,18 +1,18 @@
 import React, { useMemo, useContext } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { IconButton, Paper } from '@mui/material';
+import { Paper } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import blue from '@mui/material/colors/blue';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
 
 import { AppContext } from './AppContext';
 import Swap from './components/Swap';
+import Menu from './components/Menu';
 import Signature from './components/Signature';
 
 import './App.css';
 
 const App = () => {
-  const { appState, setAppState } = useContext(AppContext);
+  const { appState } = useContext(AppContext);
 
   const theme = useMemo(
     () => createTheme({
@@ -28,21 +28,10 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
 
-      <Paper>
-
-        <IconButton
-          color="inherit"
-          onClick={() => setAppState((prevAppState) => ({
-            darkTheme: !prevAppState.darkTheme,
-          }))}
-        >
-          <Brightness4Icon />
-        </IconButton>
-
+      <Paper id="main-window">
+        <Menu />
         <Swap />
-
         <Signature />
-
       </Paper>
 
     </ThemeProvider>

@@ -9,6 +9,9 @@ html, body, #root {
   height: 100%
 }
 
-/* #main-window {
-  flex-direction: row;
-} */
+#main-window {
+  display: grid;
+  grid-auto-rows: auto;
+  row-gap: 8px;
+  border-radius: 13px;
+}
