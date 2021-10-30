@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button } from '@mui/material';
-// import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { CustomInput, IToken } from './CustomInput';
 
 import './Swap.css';
@@ -30,14 +30,10 @@ const Swap: React.FC<ISwap> = () => (
   <div id="swap-window">
     <div id="outer-test">
       <CustomInput tokens={tokens} />
-
-      {/* <div id="test">
-        <div id="arrow-div">
-          <ArrowDownwardIcon style={{ fill: 'white' }} />
-        </div>
-      </div> */}
-
       <CustomInput tokens={tokens} />
+      <div id="arrow-div">
+        <ArrowDownwardIcon style={{ fill: 'white' }} />
+      </div>
 
     </div>
 
