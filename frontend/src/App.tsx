@@ -2,7 +2,7 @@ import React, { useMemo, useContext } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { Paper } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
-import blue from '@mui/material/colors/blue';
+import { grey, deepPurple } from '@mui/material/colors';
 
 import { AppContext } from './AppContext';
 import Swap from './components/Swap';
@@ -18,7 +18,8 @@ const App = () => {
     () => createTheme({
       palette: {
         mode: appState.darkTheme === true ? 'dark' : 'light',
-        primary: blue,
+        primary: deepPurple,
+        secondary: { main: appState.darkTheme === true ? grey[800] : grey[200] },
       },
     }),
     [appState.darkTheme],
