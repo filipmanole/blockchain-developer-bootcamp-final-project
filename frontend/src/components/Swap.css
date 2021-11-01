@@ -8,26 +8,10 @@
   width: 700px;
 }
 
-#outer-test {
+#swap-inputs {
   display: grid;
   grid-auto-rows: auto;
   row-gap: 6px;
 
   position: relative;
-}
-
-#arrow-div {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-
-  background-color: rgb(46, 138, 214);
-  border: 6px solid rgb(56, 52, 52);
-  border-radius: 13px;
-  
-  display: flex;
-  justify-content: center;
-  padding: 5px;
 }
