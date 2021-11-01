@@ -10,22 +10,31 @@ import { AppContext } from '../AppContext';
 import './Menu.css';
 
 const Menu = () => {
-  const { setAppState } = useContext(AppContext);
+  const { dispatchState } = useContext(AppContext);
 
   return (
     <div id="menu">
       <IconButton
         color="inherit"
-        onClick={() => setAppState((prevAppState) => ({
-          darkTheme: !prevAppState.darkTheme,
-        }))}
+        onClick={() => dispatchState({ type: 'SWITCH_THEME' })}
       >
         <Brightness4Icon />
       </IconButton>
 
       <ButtonGroup variant="contained" aria-label="outlined button group">
-        <Button>Swap</Button>
-        <Button>Pool</Button>
+        <Button onClick={() => {
+          dispatchState({ type: 'SWITCH_MODE', payload: 'swap' });
+        }}
+        >
+          Swap
+        </Button>
+        <Button onClick={() => {
+          dispatchState({ type: 'SWITCH_MODE', payload: 'pool' });
+        }}
+        >
+          Pool
+
+        </Button>
       </ButtonGroup>
     </div>
   );

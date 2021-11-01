@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { grey, deepPurple } from '@mui/material/colors';
 
 import { AppContext } from './AppContext';
-import Swap from './components/Swap';
+import SwapPool from './components/SwapPool';
 import Menu from './components/Menu';
 import Signature from './components/Signature';
 
@@ -31,7 +31,8 @@ const App = () => {
 
       <Paper id="main-window">
         <Menu />
-        <Swap />
+        {appState.mode === 'swap' && <SwapPool arrowButton buttonName="SWAP" />}
+        {appState.mode === 'pool' && <SwapPool buttonName="ADD POOL" />}
         <Signature />
       </Paper>
 

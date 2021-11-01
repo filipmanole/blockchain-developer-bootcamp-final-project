@@ -4,9 +4,12 @@ import { Button, Box, ButtonBase } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { CustomInput, IToken } from './CustomInput';
 
-import './Swap.css';
+import './SwapPool.css';
 
-export interface ISwap {}
+export interface ISwapPool {
+  arrowButton?: boolean;
+  buttonName: string;
+}
 
 const tokens: IToken[] = [
   {
@@ -45,24 +48,27 @@ const arrowStyle = {
   zIndex: 2,
 };
 
-const Swap: React.FC<ISwap> = () => (
-  <div id="swap-window">
-    <div id="swap-inputs">
+const SwapPool: React.FC<ISwapPool> = ({ arrowButton = false, buttonName }) => (
+  <div id="swap-pool-window">
+    <div id="swap-pool-inputs">
       <CustomInput tokens={tokens} />
       <CustomInput tokens={tokens} />
+      {arrowButton
+      && (
       <Box sx={arrowStyle}>
         <ButtonBase>
           <ArrowDownwardIcon sx={{ fill: 'white' }} />
         </ButtonBase>
       </Box>
+      )}
     </div>
 
     <div>
       <Button sx={button} fullWidth variant="contained">
-        SWAP
+        {buttonName}
       </Button>
     </div>
   </div>
 );
 
-export default Swap;
+export default SwapPool;
