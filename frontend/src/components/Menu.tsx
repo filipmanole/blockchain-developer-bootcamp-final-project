@@ -23,7 +23,7 @@ const Menu = () => {
         <Brightness4Icon />
       </IconButton>
 
-      <ButtonGroup variant="outlined" aria-label="outlined button group">
+      <ButtonGroup variant="contained" aria-label="outlined button group">
         <Button>Swap</Button>
         <Button>Pool</Button>
       </ButtonGroup>
