@@ -10,12 +10,13 @@
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "./tsconfig.json"
+        "project": "tsconfig.json"
     },
     "plugins": [
         "react",
         "@typescript-eslint"
     ],
     "rules": {
+        "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["draft"] }]
     }
 }
