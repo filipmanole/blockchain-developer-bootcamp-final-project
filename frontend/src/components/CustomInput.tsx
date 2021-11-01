@@ -19,10 +19,11 @@ const boxStyle = {
   display: 'flex',
   alignItems: 'center',
   borderRadius: 4,
+  bgcolor: 'secondary.main',
   p: 1,
 };
 
-const style = {
+const modalStyle = {
   position: 'absolute' as 'absolute',
   top: '50%',
   left: '50%',
@@ -31,6 +32,7 @@ const style = {
   bgcolor: 'background.paper',
   borderRadius: 4,
   boxShadow: 24,
+  border: '1px solid grey',
   p: 1,
 };
 
@@ -66,7 +68,7 @@ export const CustomInput: React.FC<ICustomInput> = ({ tokens }) => {
       >
         <Box
           id="select-modal"
-          sx={style}
+          sx={modalStyle}
         >
           {tokens.map((t) => (
             <>
