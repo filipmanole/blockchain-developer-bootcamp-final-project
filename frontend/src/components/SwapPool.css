@@ -1,0 +1,17 @@
+#swap-pool-window {
+  display: grid;
+  grid-auto-rows: auto;
+  row-gap: 10px;
+
+  padding: 5px;
+  border-radius: 10px;
+  width: 700px;
+}
+
+#swap-pool-inputs {
+  display: grid;
+  grid-auto-rows: auto;
+  row-gap: 6px;
+
+  position: relative;
+}

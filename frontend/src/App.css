@@ -1,0 +1,31 @@
+#root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+html, body, #root {
+  height: 100%
+}
+
+#main-div {
+  display: grid;
+  grid-auto-rows: auto;
+  row-gap: 25px;
+}
+
+#main-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  border-radius: 13px;
+  font-family: Monospace;
+}
+
+#main-window {
+  display: grid;
+  grid-auto-rows: auto;
+  row-gap: 8px;
+  border-radius: 13px;
+}
