@@ -9,6 +9,24 @@ html, body, #root {
   height: 100%
 }
 
+#main-div {
+  display: grid;
+  grid-auto-rows: auto;
+  row-gap: 25px;
+}
+
+#main-bar {
+  display: grid;
+  grid-auto-rows: auto;
+  /* row-gap: 10px; */
+  justify-items: center;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-radius: 13px;
+
+  font-family: Monospace;
+}
+
 #main-window {
   display: grid;
   grid-auto-rows: auto;
