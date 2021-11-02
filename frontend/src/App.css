@@ -1,5 +1,4 @@
 #root {
-  /* background-color: #282c34; */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,14 +15,11 @@ html, body, #root {
 }
 
 #main-bar {
-  display: grid;
-  grid-auto-rows: auto;
-  /* row-gap: 10px; */
-  justify-items: center;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
   border-radius: 13px;
-
   font-family: Monospace;
 }
 

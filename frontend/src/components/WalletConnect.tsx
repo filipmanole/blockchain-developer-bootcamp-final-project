@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { useWeb3React } from '@web3-react/core';
 import {
-  Button, Box, ButtonBase, Modal,
+  Button, Box, ButtonBase, IconButton, Modal,
 } from '@mui/material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { injected } from '../connectors';
+
+import { AppContext } from '../AppContext';
 
 import './WalletConnect.css';
 
@@ -31,14 +34,15 @@ const modalStyle = {
 const statusStyle = {
   display: 'flex',
   flexDirection: 'row' as 'row',
+  width: '150px',
 
   bgcolor: 'secondary.main',
   borderRadius: '13px',
-  pl: '10px',
-  pr: '10px',
 };
 
 const WalletConnect: React.FC<IWalletConnect> = () => {
+  const { dispatchState } = useContext(AppContext);
+
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -65,9 +69,25 @@ const WalletConnect: React.FC<IWalletConnect> = () => {
 
   return (
     <>
-      <h1>SWAPPER</h1>
+      <h1>swapper</h1>
+      <IconButton
+        color="inherit"
+        onClick={() => dispatchState({ type: 'SWITCH_THEME' })}
+      >
+        <Brightness4Icon />
+      </IconButton>
       <Box sx={statusStyle}>
-        <ButtonBase onClick={handleOpen}>
+        <ButtonBase
+          sx={{
+            display: 'flex',
+            flexDirection: 'row' as 'row',
+            justifyContent: 'flex-start',
+            borderRadius: '13px',
+            width: '100%',
+            pl: '10px',
+          }}
+          onClick={handleOpen}
+        >
           {active
             ? (
               <>

@@ -1,9 +1,8 @@
 import React, { useContext } from 'react';
 
 import {
-  IconButton, Button, ButtonGroup,
+  Button, ButtonGroup,
 } from '@mui/material';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
 
 import { AppContext } from '../AppContext';
 
@@ -14,13 +13,6 @@ const Menu = () => {
 
   return (
     <div id="menu">
-      <IconButton
-        color="inherit"
-        onClick={() => dispatchState({ type: 'SWITCH_THEME' })}
-      >
-        <Brightness4Icon />
-      </IconButton>
-
       <ButtonGroup variant="contained" aria-label="outlined button group">
         <Button onClick={() => {
           dispatchState({ type: 'SWITCH_MODE', payload: 'swap' });
