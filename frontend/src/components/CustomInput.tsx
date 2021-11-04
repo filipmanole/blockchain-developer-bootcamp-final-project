@@ -4,15 +4,16 @@ import {
   Box, Button, Modal,
 } from '@mui/material';
 
+import IToken from '../types/IToken';
+
 import './CustomInput.css';
 
-export interface IToken {
-  name: string,
-  symbol: string,
-}
-
 export interface ICustomInput {
-  tokens: IToken[]
+  tokens: IToken[],
+  token: IToken,
+  amount: string,
+  setToken: (token: IToken) => void,
+  setAmount: (input: string) => void,
 }
 
 const boxStyle = {
@@ -36,12 +37,22 @@ const modalStyle = {
   p: 1,
 };
 
-export const CustomInput: React.FC<ICustomInput> = ({ tokens }) => {
+export const CustomInput: React.FC<ICustomInput> = ({
+  tokens,
+  token,
+  amount,
+  setToken,
+  setAmount,
+}) => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const [token, setToken] = React.useState('Select a Token');
+  function isNumeric(str) {
+    if (typeof str !== 'string') return false;
+    /* eslint-disable-next-line */
+    return !isNaN(str as unknown as number) && !isNaN(parseFloat(str));
+  }
 
   return (
     <Box
@@ -52,12 +63,17 @@ export const CustomInput: React.FC<ICustomInput> = ({ tokens }) => {
         id="symbol-button"
         variant="contained"
       >
-        {token}
+        {token.address !== '' ? token.symbol : 'Select a Token'}
         <KeyboardArrowDownIcon />
       </Button>
       <input
         id="amount-input"
         placeholder="0.0"
+        value={amount}
+        onChange={(e) => {
+          if (e.target.value === '') setAmount('');
+          if (isNumeric(e.target.value)) setAmount(e.target.value);
+        }}
       />
 
       <Modal
@@ -70,14 +86,16 @@ export const CustomInput: React.FC<ICustomInput> = ({ tokens }) => {
           id="select-modal"
           sx={modalStyle}
         >
-          {tokens.map((t) => (
+          {tokens.map((t, i) => (
             <>
               <Button
+                /* eslint-disable-next-line */
+                key={i}
                 fullWidth
                 variant="contained"
                 id="content-button"
                 onClick={() => {
-                  setToken(t.symbol);
+                  setToken(t);
                   handleClose();
                 }}
               >
