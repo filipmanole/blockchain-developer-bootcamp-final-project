@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import { injected } from '../connectors';
+import injected from '../connectors';
 
 import { AppContext } from '../AppContext';
 
