@@ -4,7 +4,7 @@ import { Web3ReactProvider } from '@web3-react/core';
 import { ethers } from 'ethers';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { Paper } from '@mui/material';
+import { Paper, Button } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { grey, deepPurple } from '@mui/material/colors';
 
@@ -49,6 +49,20 @@ const App = () => {
             <Menu />
             {mode === 'swap' && <SwapPool arrowButton buttonName="SWAP" />}
             {mode === 'pool' && <SwapPool buttonName="ADD POOL" />}
+            {mode === 'withdraw' && (
+            <Button
+              sx={{
+                fontFamily: 'Monospace',
+                fontWeight: 'bold',
+                fontSize: '20px',
+                borderRadius: '13px',
+              }}
+              variant="contained"
+              fullWidth
+            >
+              Withdraw
+            </Button>
+            )}
             <Signature />
           </Paper>
         </div>

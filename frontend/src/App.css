@@ -28,4 +28,6 @@ html, body, #root {
   grid-auto-rows: auto;
   row-gap: 8px;
   border-radius: 13px;
+  padding: 10px;
+  width: 700px;
 }
