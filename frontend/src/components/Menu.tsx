@@ -1,31 +1,25 @@
-import React, { useContext } from 'react';
+import React from 'react';
 
 import {
   Button, ButtonGroup,
 } from '@mui/material';
 
-import { AppContext } from '../AppContext';
+import { useAtom } from 'jotai';
+import { appMode } from '../states';
 
 import './Menu.css';
 
 const Menu = () => {
-  const { dispatchState } = useContext(AppContext);
+  const [, setMode] = useAtom(appMode);
 
   return (
     <div id="menu">
       <ButtonGroup variant="contained" aria-label="outlined button group">
-        <Button onClick={() => {
-          dispatchState({ type: 'SWITCH_MODE', payload: 'swap' });
-        }}
-        >
+        <Button onClick={() => { setMode('swap'); }}>
           Swap
         </Button>
-        <Button onClick={() => {
-          dispatchState({ type: 'SWITCH_MODE', payload: 'pool' });
-        }}
-        >
+        <Button onClick={() => { setMode('pool'); }}>
           Pool
-
         </Button>
       </ButtonGroup>
     </div>

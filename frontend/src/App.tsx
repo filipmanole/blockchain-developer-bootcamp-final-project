@@ -1,4 +1,4 @@
-import React, { useMemo, useContext } from 'react';
+import React, { useMemo } from 'react';
 
 import { Web3ReactProvider } from '@web3-react/core';
 import { ethers } from 'ethers';
@@ -8,7 +8,9 @@ import { Paper } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { grey, deepPurple } from '@mui/material/colors';
 
-import { AppContext } from './AppContext';
+import { useAtom } from 'jotai';
+import { appTheme, appMode } from './states';
+
 import WalletConnect from './components/WalletConnect';
 import SwapPool from './components/SwapPool';
 import Menu from './components/Menu';
@@ -21,21 +23,22 @@ function getLibrary(provider) {
 }
 
 const App = () => {
-  const { appState } = useContext(AppContext);
+  const [theme] = useAtom(appTheme);
+  const [mode] = useAtom(appMode);
 
-  const theme = useMemo(
+  const customTheme = useMemo(
     () => createTheme({
       palette: {
-        mode: appState.darkTheme === true ? 'dark' : 'light',
+        mode: theme,
         primary: deepPurple,
-        secondary: { main: appState.darkTheme === true ? grey[800] : grey[200] },
+        secondary: { main: theme === 'dark' ? grey[800] : grey[200] },
       },
     }),
-    [appState.darkTheme],
+    [theme],
   );
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={customTheme}>
       <CssBaseline />
       <Web3ReactProvider getLibrary={getLibrary}>
         <div id="main-div">
@@ -44,8 +47,8 @@ const App = () => {
           </Paper>
           <Paper id="main-window">
             <Menu />
-            {appState.mode === 'swap' && <SwapPool arrowButton buttonName="SWAP" />}
-            {appState.mode === 'pool' && <SwapPool buttonName="ADD POOL" />}
+            {mode === 'swap' && <SwapPool arrowButton buttonName="SWAP" />}
+            {mode === 'pool' && <SwapPool buttonName="ADD POOL" />}
             <Signature />
           </Paper>
         </div>

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 
 import { useWeb3React } from '@web3-react/core';
 import {
@@ -6,9 +6,10 @@ import {
 } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import { useAtom } from 'jotai';
 import injected from '../connectors';
 
-import { AppContext } from '../AppContext';
+import { appTheme } from '../states';
 
 import './WalletConnect.css';
 
@@ -41,11 +42,11 @@ const statusStyle = {
 };
 
 const WalletConnect: React.FC<IWalletConnect> = () => {
-  const { dispatchState } = useContext(AppContext);
-
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const [theme, setTheme] = useAtom(appTheme);
 
   const {
     active,
@@ -72,7 +73,7 @@ const WalletConnect: React.FC<IWalletConnect> = () => {
       <h1>swapper</h1>
       <IconButton
         color="inherit"
-        onClick={() => dispatchState({ type: 'SWITCH_THEME' })}
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       >
         <Brightness4Icon />
       </IconButton>
