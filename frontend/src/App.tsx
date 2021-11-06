@@ -12,7 +12,8 @@ import { useAtom } from 'jotai';
 import { appTheme, appMode } from './states';
 
 import WalletConnect from './components/WalletConnect';
-import SwapPool from './components/SwapPool';
+import Swap from './components/Swap';
+import Pool from './components/Pool';
 import Menu from './components/Menu';
 import Signature from './components/Signature';
 
@@ -47,8 +48,8 @@ const App = () => {
           </Paper>
           <Paper id="main-window">
             <Menu />
-            {mode === 'swap' && <SwapPool arrowButton buttonName="SWAP" />}
-            {mode === 'pool' && <SwapPool buttonName="ADD POOL" />}
+            {mode === 'swap' && <Swap />}
+            {mode === 'pool' && <Pool />}
             {mode === 'withdraw' && (
             <Button
               sx={{

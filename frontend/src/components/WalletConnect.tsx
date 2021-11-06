@@ -7,9 +7,11 @@ import {
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { useAtom } from 'jotai';
+import { Signer } from 'ethers';
 import injected from '../connectors';
 
-import { appTheme } from '../states';
+import { appTheme, swapperContract, signerAccount } from '../states';
+import { Swapper__factory } from '../typechain';
 
 import './WalletConnect.css';
 
@@ -47,13 +49,25 @@ const WalletConnect: React.FC<IWalletConnect> = () => {
   const handleClose = () => setOpen(false);
 
   const [theme, setTheme] = useAtom(appTheme);
+  const [, setSwapper] = useAtom(swapperContract);
+  const [, setSigner] = useAtom(signerAccount);
 
   const {
     active,
     account,
+    library,
     activate,
     deactivate,
   } = useWeb3React();
+
+  React.useEffect(() => {
+    if (active) {
+      const signer = library.getSigner(account).connectUnchecked();
+      setSigner(signer);
+      setSwapper(Swapper__factory.connect('0x153b84F377C6C7a7D93Bd9a717E48097Ca6Cfd11', signer as Signer));
+    }
+  },
+  [account]);
 
   const connect = async () => {
     await activate(injected); /* TODO handle exception */

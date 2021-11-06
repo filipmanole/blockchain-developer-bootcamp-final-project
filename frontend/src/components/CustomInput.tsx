@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { Key } from 'react';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import {
   Box, Button, Modal,
 } from '@mui/material';
 
+import { AddressZero } from '@ethersproject/constants';
 import IToken from '../types/IToken';
 
 import './CustomInput.css';
@@ -14,6 +15,7 @@ export interface ICustomInput {
   amount: string,
   setToken: (token: IToken) => void,
   setAmount: (input: string) => void,
+  onInputChange?: () => void,
 }
 
 const boxStyle = {
@@ -43,16 +45,14 @@ export const CustomInput: React.FC<ICustomInput> = ({
   amount,
   setToken,
   setAmount,
+  onInputChange,
 }) => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  function isNumeric(str) {
-    if (typeof str !== 'string') return false;
-    /* eslint-disable-next-line */
-    return !isNaN(str as unknown as number) && !isNaN(parseFloat(str));
-  }
+  /* eslint-disable-next-line */
+  const isNumeric = (str:string): boolean => !isNaN(str as unknown as number) && !isNaN(parseFloat(str));
 
   return (
     <Box
@@ -63,14 +63,16 @@ export const CustomInput: React.FC<ICustomInput> = ({
         id="symbol-button"
         variant="contained"
       >
-        {token.address !== '' ? token.symbol : 'Select a Token'}
+        {token.address !== AddressZero ? token.symbol : 'Select a Token'}
         <KeyboardArrowDownIcon />
       </Button>
       <input
+        disabled={token.address === AddressZero}
         id="amount-input"
         placeholder="0.0"
         value={amount}
         onChange={(e) => {
+          if (onInputChange) onInputChange();
           if (e.target.value === '') setAmount('');
           if (isNumeric(e.target.value)) setAmount(e.target.value);
         }}
@@ -86,23 +88,19 @@ export const CustomInput: React.FC<ICustomInput> = ({
           id="select-modal"
           sx={modalStyle}
         >
-          {tokens.map((t, i) => (
-            <>
-              <Button
-                /* eslint-disable-next-line */
-                key={i}
-                fullWidth
-                variant="contained"
-                id="content-button"
-                onClick={() => {
-                  setToken(t);
-                  handleClose();
-                }}
-              >
-                {t.symbol}
-              </Button>
-              <br />
-            </>
+          {tokens.map((t) => (
+            <Button
+              key={t.address as Key}
+              fullWidth
+              variant="contained"
+              id="content-button"
+              onClick={() => {
+                setToken(t);
+                handleClose();
+              }}
+            >
+              {t.symbol}
+            </Button>
           ))}
         </Box>
       </Modal>
