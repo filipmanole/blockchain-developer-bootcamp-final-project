@@ -8,9 +8,10 @@ const Signature: React.FC<{}> = () => (
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
+      fontFamily: 'Monospace',
     }}
   >
-    Made with &nbsp;
+    Made with&nbsp;
     <FavoriteBorderIcon style={{ fill: 'red' }} />
     &nbsp;by Filip.
   </p>
