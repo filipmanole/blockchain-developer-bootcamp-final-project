@@ -73,8 +73,8 @@ const Swap: React.FC<ISwap> = () => {
   const [amount0, setAmount0] = React.useState('');
   const [amount1, setAmount1] = React.useState('');
 
-  const useToken0 = useToken(token0.address);
-  const useToken1 = useToken(token1.address);
+  const tokenIn = useToken(token0.address);
+  const tokenOut = useToken(token1.address);
 
   const [swapper] = useAtom(swapperContract);
 
@@ -123,8 +123,27 @@ const Swap: React.FC<ISwap> = () => {
     return false;
   };
 
-  const swap = () => {
-    console.log(useToken0, useToken1, swapper, state);
+  const swap = async () => {
+    if (!tokenIn.usable || !tokenOut.usable) return;
+
+    const amountIn = tokenIn.expand(parseFloat(amount0));
+    const amountOut = tokenOut.expand(parseFloat(amount1));
+    tokenIn.approve(swapper.address, amountIn);
+
+    /* Add try catch */
+    if (state === SwapState.EXACT_INPUT) {
+      const tx = await swapper.swapExactTokensIn(
+        token0.address, token1.address, amountIn, amountOut,
+      );
+      await tx.wait();
+    } else if (state === SwapState.EXACT_OUTPUT) {
+      const tx = await swapper.swapExactTokensOut(
+        token0.address, token1.address, amountIn, amountOut,
+      );
+      await tx.wait();
+    } else {
+      throw new Error('Could not perform swap...');
+    }
   };
 
   const getButtonText = (): string => {
@@ -147,6 +166,30 @@ const Swap: React.FC<ISwap> = () => {
   React.useEffect(() => {
     if (amountNotEntered()) setState(SwapState.NO_INPUT_OUTPUT);
   }, [amount0, amount1]);
+
+  React.useEffect(() => {
+    if (!tokenIn.usable || !tokenOut.usable) return;
+
+    if (state !== SwapState.EXACT_INPUT) return;
+
+    const amountIn = tokenIn.expand(parseFloat(amount0));
+    const path: string[] = [token0.address, token1.address];
+    swapper.getAmountsOut(amountIn, path).then((amounts) => {
+      setAmount1(tokenOut.shrink(amounts[1]));
+    });
+  }, [amount0]);
+
+  React.useEffect(() => {
+    if (!tokenIn.usable || !tokenOut.usable) return;
+
+    if (state !== SwapState.EXACT_OUTPUT) return;
+
+    const amountOut = tokenOut.expand(parseFloat(amount1));
+    const path: string[] = [token0.address, token1.address];
+    swapper.getAmountsIn(amountOut, path).then((amounts) => {
+      setAmount0(tokenOut.shrink(amounts[0]));
+    });
+  }, [amount1]);
 
   return (
     <div id="swap-pool-window">
@@ -183,7 +226,13 @@ const Swap: React.FC<ISwap> = () => {
       </div>
 
       <div>
-        <Button disabled={tokensNotSelected() || amountNotEntered()} onClick={swap} sx={button} fullWidth variant="contained">
+        <Button
+          disabled={tokensNotSelected() || amountNotEntered()}
+          onClick={swap}
+          sx={button}
+          fullWidth
+          variant="contained"
+        >
           {getButtonText()}
         </Button>
       </div>
