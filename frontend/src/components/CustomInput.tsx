@@ -18,6 +18,8 @@ export interface ICustomInput {
   onInputChange?: () => void,
 }
 
+const textStyle = { fontFamily: 'Monospace', fontWeight: 'bold', textAlign: 'center' };
+
 const boxStyle = {
   display: 'flex',
   alignItems: 'center',
@@ -88,20 +90,24 @@ export const CustomInput: React.FC<ICustomInput> = ({
           id="select-modal"
           sx={modalStyle}
         >
-          {tokens.map((t) => (
-            <Button
-              key={t.address as Key}
-              fullWidth
-              variant="contained"
-              id="content-button"
-              onClick={() => {
-                setToken(t);
-                handleClose();
-              }}
-            >
-              {t.symbol}
-            </Button>
-          ))}
+          {
+            tokens.length === 0
+              ? <p style={textStyle as React.CSSProperties}>No tokens available...</p>
+              : tokens.map((t) => (
+                <Button
+                  key={t.address as Key}
+                  fullWidth
+                  variant="contained"
+                  id="content-button"
+                  onClick={() => {
+                    setToken(t);
+                    handleClose();
+                  }}
+                >
+                  {t.symbol}
+                </Button>
+              ))
+          }
         </Box>
       </Modal>
     </Box>
