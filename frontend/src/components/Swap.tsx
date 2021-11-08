@@ -152,7 +152,11 @@ const Swap: React.FC<ISwap> = () => {
     <div id="swap-pool-window">
       <div id="swap-pool-inputs">
         <CustomInput
-          tokens={tokens}
+          tokens={
+            tokens.filter(
+              (token) => token.address !== token0.address && token.address !== token1.address,
+            )
+          }
           token={token0}
           amount={amount0}
           setToken={setToken0}
@@ -160,7 +164,11 @@ const Swap: React.FC<ISwap> = () => {
           onInputChange={onAmount0Change}
         />
         <CustomInput
-          tokens={tokens}
+          tokens={
+            tokens.filter(
+              (token) => token.address !== token0.address && token.address !== token1.address,
+            )
+          }
           token={token1}
           amount={amount1}
           setToken={setToken1}
