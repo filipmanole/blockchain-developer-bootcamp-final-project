@@ -168,8 +168,8 @@ const Swap: React.FC<ISwap> = () => {
 
   React.useEffect(() => {
     if (!tokenIn.usable || !tokenOut.usable) return;
-
     if (state !== SwapState.EXACT_INPUT) return;
+    if (amount0 === '') return;
 
     const amountIn = tokenIn.expand(parseFloat(amount0));
     const path: string[] = [token0.address, token1.address];
@@ -180,8 +180,8 @@ const Swap: React.FC<ISwap> = () => {
 
   React.useEffect(() => {
     if (!tokenIn.usable || !tokenOut.usable) return;
-
     if (state !== SwapState.EXACT_OUTPUT) return;
+    if (amount1 === '') return;
 
     const amountOut = tokenOut.expand(parseFloat(amount1));
     const path: string[] = [token0.address, token1.address];
