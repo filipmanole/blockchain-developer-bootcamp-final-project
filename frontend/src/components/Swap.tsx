@@ -52,7 +52,6 @@ const arrowStyle = {
 
   display: 'flex',
   justifyContent: 'center',
-  padding: '4px',
 
   boxShadow: 0,
   zIndex: 2,
@@ -219,7 +218,10 @@ const Swap: React.FC<ISwap> = () => {
           onInputChange={onAmount1Change}
         />
         <Box sx={arrowStyle}>
-          <ButtonBase onClick={switchInputs}>
+          <ButtonBase
+            sx={{ borderRadius: '13px', padding: '4px' }}
+            onClick={switchInputs}
+          >
             <ArrowDownwardIcon sx={{ fill: 'white' }} />
           </ButtonBase>
         </Box>
