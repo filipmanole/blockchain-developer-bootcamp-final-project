@@ -22,12 +22,3 @@ html, body, #root {
   border-radius: 13px;
   font-family: Monospace;
 }
-
-#main-window {
-  display: grid;
-  grid-auto-rows: auto;
-  row-gap: 8px;
-  border-radius: 13px;
-  padding: 10px;
-  width: 700px;
-}

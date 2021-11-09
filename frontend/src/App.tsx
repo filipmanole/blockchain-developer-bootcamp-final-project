@@ -4,18 +4,16 @@ import { Web3ReactProvider } from '@web3-react/core';
 import { ethers } from 'ethers';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { Paper, Button } from '@mui/material';
+import { Paper } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { grey, deepPurple } from '@mui/material/colors';
 
 import { useAtom } from 'jotai';
-import { appTheme, appMode } from './states';
+import { appTheme } from './states';
 
 import WalletConnect from './components/WalletConnect';
-import Swap from './components/Swap';
-import Pool from './components/Pool';
-import Menu from './components/Menu';
-import Signature from './components/Signature';
+
+import Dashboard from './components/Dashboard';
 
 import './App.css';
 
@@ -25,7 +23,6 @@ function getLibrary(provider) {
 
 const App = () => {
   const [theme] = useAtom(appTheme);
-  const [mode] = useAtom(appMode);
 
   const customTheme = useMemo(
     () => createTheme({
@@ -46,26 +43,7 @@ const App = () => {
           <Paper id="main-bar">
             <WalletConnect />
           </Paper>
-          <Paper id="main-window">
-            <Menu />
-            {mode === 'swap' && <Swap />}
-            {mode === 'pool' && <Pool />}
-            {mode === 'withdraw' && (
-            <Button
-              sx={{
-                fontFamily: 'Monospace',
-                fontWeight: 'bold',
-                fontSize: '20px',
-                borderRadius: '13px',
-              }}
-              variant="contained"
-              fullWidth
-            >
-              Withdraw
-            </Button>
-            )}
-            <Signature />
-          </Paper>
+          <Dashboard />
         </div>
       </Web3ReactProvider>
     </ThemeProvider>

@@ -12,3 +12,5 @@ export const appMode = atom('swap' as TMode);
 export const swapperContract = atom(null as Swapper);
 
 export const signerAccount = atom(null as Signer);
+
+export const connectModalState = atom(false);
