@@ -69,6 +69,7 @@ export const CustomInput: React.FC<ICustomInput> = ({
         <KeyboardArrowDownIcon />
       </Button>
       <input
+        autoComplete="off"
         disabled={token.address === AddressZero}
         id="amount-input"
         placeholder="0.0"
