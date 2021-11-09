@@ -61,8 +61,8 @@ const Pool: React.FC<IPool> = () => {
   };
 
   const addLiquidity = async () => {
-    const amountToken0 = useToken0.expand(parseFloat(amount0));
-    const amountToken1 = useToken1.expand(parseFloat(amount1));
+    const amountToken0 = useToken0.expand(amount0);
+    const amountToken1 = useToken1.expand(amount1);
 
     try {
       await useToken0.approve(swapper.address, amountToken0);

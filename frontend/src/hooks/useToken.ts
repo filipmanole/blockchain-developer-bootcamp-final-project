@@ -1,12 +1,12 @@
 import { useAtom } from 'jotai';
-import { BigNumber } from 'ethers';
+import { ethers, BigNumber } from 'ethers';
 import { AddressZero } from '@ethersproject/constants';
 import { ERC20PresetMinterPauser__factory } from '../typechain';
 import { signerAccount } from '../states';
 
 export interface IUseToken {
   usable: boolean,
-  expand?: (num: number) => BigNumber;
+  expand?: (num: string) => BigNumber;
   shrink?: (num: BigNumber) => string;
   approve?: (delegate: string, amount: BigNumber) => Promise<void>;
 }
@@ -20,8 +20,14 @@ const useToken = (tokenAddress: string, decimals: number = 18): IUseToken => {
 
   const token = ERC20PresetMinterPauser__factory.connect(tokenAddress, signer);
 
-  const expand = (num: number) => BigNumber.from(num).mul(BigNumber.from(10).pow(decimals));
-  const shrink = (num: BigNumber) => num.div(BigNumber.from(10).pow(decimals)).toString();
+  const expand = (num: string) => ethers.utils.parseUnits(num, decimals);
+  const shrink = (num: BigNumber) => ethers.utils.formatUnits(num, decimals);
+
+  // const expand = (num: number) => BigNumber.from(num).mul(BigNumber.from(10).pow(decimals));
+  // const shrink = (num: BigNumber) => num.div(BigNumber.from(10).pow(decimals)).toString();
+
+  // const expand = (num: number) => BigNumber.from(num * 10 ** decimals);
+  // const shrink = (num: BigNumber) => num.toNumber() / 10 ** decimals;
 
   const approve = async (delegate: string, amount: BigNumber) => {
     const txn = await token.approve(delegate, amount);

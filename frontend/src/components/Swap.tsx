@@ -125,8 +125,8 @@ const Swap: React.FC<ISwap> = () => {
   const swap = async () => {
     if (!tokenIn.usable || !tokenOut.usable) return;
 
-    const amountIn = tokenIn.expand(parseFloat(amount0));
-    const amountOut = tokenOut.expand(parseFloat(amount1));
+    const amountIn = tokenIn.expand(amount0);
+    const amountOut = tokenOut.expand(amount1);
     tokenIn.approve(swapper.address, amountIn);
 
     /* Add try catch */
@@ -171,7 +171,7 @@ const Swap: React.FC<ISwap> = () => {
     if (state !== SwapState.EXACT_INPUT) return;
     if (amount0 === '') return;
 
-    const amountIn = tokenIn.expand(parseFloat(amount0));
+    const amountIn = tokenIn.expand(amount0);
     const path: string[] = [token0.address, token1.address];
     swapper.getAmountsOut(amountIn, path).then((amounts) => {
       setAmount1(tokenOut.shrink(amounts[1]));
@@ -183,7 +183,7 @@ const Swap: React.FC<ISwap> = () => {
     if (state !== SwapState.EXACT_OUTPUT) return;
     if (amount1 === '') return;
 
-    const amountOut = tokenOut.expand(parseFloat(amount1));
+    const amountOut = tokenOut.expand(amount1);
     const path: string[] = [token0.address, token1.address];
     swapper.getAmountsIn(amountOut, path).then((amounts) => {
       setAmount0(tokenOut.shrink(amounts[0]));
