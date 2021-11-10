@@ -1,19 +1,24 @@
-import React from 'react';
+import React, { Key } from 'react';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import {
   Box, Button, Modal,
 } from '@mui/material';
 
+import { AddressZero } from '@ethersproject/constants';
+import IToken from '../types/IToken';
+
 import './CustomInput.css';
 
-export interface IToken {
-  name: string,
-  symbol: string,
+export interface ICustomInput {
+  tokens: IToken[],
+  token: IToken,
+  amount: string,
+  setToken: (token: IToken) => void,
+  setAmount: (input: string) => void,
+  onInputChange?: () => void,
 }
 
-export interface ICustomInput {
-  tokens: IToken[]
-}
+const textStyle = { fontFamily: 'Monospace', fontWeight: 'bold', textAlign: 'center' };
 
 const boxStyle = {
   display: 'flex',
@@ -36,12 +41,20 @@ const modalStyle = {
   p: 1,
 };
 
-export const CustomInput: React.FC<ICustomInput> = ({ tokens }) => {
+export const CustomInput: React.FC<ICustomInput> = ({
+  tokens,
+  token,
+  amount,
+  setToken,
+  setAmount,
+  onInputChange,
+}) => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const [token, setToken] = React.useState('Select a Token');
+  /* eslint-disable-next-line */
+  const isNumeric = (str:string): boolean => !isNaN(str as unknown as number) && !isNaN(parseFloat(str));
 
   return (
     <Box
@@ -52,12 +65,20 @@ export const CustomInput: React.FC<ICustomInput> = ({ tokens }) => {
         id="symbol-button"
         variant="contained"
       >
-        {token}
+        {token.address !== AddressZero ? token.symbol : 'Select a Token'}
         <KeyboardArrowDownIcon />
       </Button>
       <input
+        autoComplete="off"
+        disabled={token.address === AddressZero}
         id="amount-input"
         placeholder="0.0"
+        value={amount}
+        onChange={(e) => {
+          if (onInputChange) onInputChange();
+          if (e.target.value === '') setAmount('');
+          if (isNumeric(e.target.value)) setAmount(e.target.value);
+        }}
       />
 
       <Modal
@@ -70,22 +91,24 @@ export const CustomInput: React.FC<ICustomInput> = ({ tokens }) => {
           id="select-modal"
           sx={modalStyle}
         >
-          {tokens.map((t) => (
-            <>
-              <Button
-                fullWidth
-                variant="contained"
-                id="content-button"
-                onClick={() => {
-                  setToken(t.symbol);
-                  handleClose();
-                }}
-              >
-                {t.symbol}
-              </Button>
-              <br />
-            </>
-          ))}
+          {
+            tokens.length === 0
+              ? <p style={textStyle as React.CSSProperties}>No tokens available...</p>
+              : tokens.map((t) => (
+                <Button
+                  key={t.address as Key}
+                  fullWidth
+                  variant="contained"
+                  id="content-button"
+                  onClick={() => {
+                    setToken(t);
+                    handleClose();
+                  }}
+                >
+                  {t.symbol}
+                </Button>
+              ))
+          }
         </Box>
       </Modal>
     </Box>

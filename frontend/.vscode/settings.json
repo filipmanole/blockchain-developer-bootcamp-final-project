@@ -1,0 +1,15 @@
+{
+  "eslint.workingDirectories": [
+    ".",
+  ],
+  "[typescriptreact]": {
+    "editor.codeActionsOnSave": { "source.fixAll.eslint": true }, 
+    "editor.formatOnSave": true,
+  },
+  "[typescript]": {
+    "editor.codeActionsOnSave": { "source.fixAll.eslint": true }, 
+    "editor.formatOnSave": true,
+  },
+  "eslint.alwaysShowStatus": true, 
+  "files.autoSave": "onFocusChange",
+}
