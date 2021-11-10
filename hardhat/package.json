@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "npx hardhat clean",
-    "compile": "npx hardhat compile",
+    "clean": "npx hardhat clean && rm -fr ../frontend/src/typechain",
+    "compile": "npx hardhat compile && rsync -r typechain ../frontend/src",
     "test": "npx hardhat test"
   },
   "keywords": [],

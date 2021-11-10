@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+      - node_modules:/app/node_modules
+    ports:
+      - ${FRONTEND_PORT}:3000
+    environment:
+      REACT_APP_SIMPLE_STORAGE_ADDRESS: ${REACT_APP_SIMPLE_STORAGE_ADDRESS}
+
+volumes:
+  node_modules:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./frontend/node_modules

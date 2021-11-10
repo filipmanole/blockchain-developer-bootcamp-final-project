@@ -5,5 +5,4 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
-  "solidity.packageDefaultDependenciesDirectory": "hardhat/node_modules"
 }

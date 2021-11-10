@@ -1,0 +1,40 @@
+#symbol-button {
+  border-radius: 15px;
+  font-family: 'Monospace';
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#amount-input {
+  text-align: right;
+  border-radius: 4px;
+  font-family: Monospace;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 10px;
+  background: rgba(0, 0, 0, 0);
+  border: 0;
+  color: inherit;
+  flex: 1 1 auto;
+}
+
+#amount-input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  opacity: 1; /* Firefox */
+}
+
+#amount-input:focus {
+  outline: none;
+}
+
+#select-modal:focus {
+  outline: none;
+}
+
+#content-button {
+  font-family: Monospace;
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  border-radius: 10px;
+}

@@ -1,0 +1,13 @@
+#swap-pool-window {
+  display: grid;
+  grid-auto-rows: auto;
+  row-gap: 10px;
+}
+
+#swap-pool-inputs {
+  display: grid;
+  grid-auto-rows: auto;
+  row-gap: 6px;
+
+  position: relative;
+}
