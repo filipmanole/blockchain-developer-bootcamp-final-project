@@ -24,7 +24,7 @@ contract Swapper is Ownable {
   );
   event SwappedExactInput();
   event SwappedExactOutput();
-  event Withdrawn();
+  event Withdrawn(address token, uint256 balance);
 
   constructor(address _factory, address _router) {
     factory = IUniswapV2Factory(_factory);
