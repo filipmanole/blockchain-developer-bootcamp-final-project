@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 
 import { AddressZero } from '@ethersproject/constants';
-import IToken from '../types/IToken';
+import { IToken } from '../types';
 
 import './CustomInput.css';
 

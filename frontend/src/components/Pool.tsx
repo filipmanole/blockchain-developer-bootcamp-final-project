@@ -4,7 +4,7 @@ import { useAtom } from 'jotai';
 import { AddressZero } from '@ethersproject/constants';
 import { CustomInput } from './CustomInput';
 import { swapperContract } from '../states';
-import IToken from '../types/IToken';
+import { IToken } from '../types';
 import useToken from '../hooks/useToken';
 
 import './SwapPool.css';
