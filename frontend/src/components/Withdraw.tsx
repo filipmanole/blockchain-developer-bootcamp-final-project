@@ -1,13 +1,24 @@
 import React from 'react';
+import { ethers, BigNumber } from 'ethers';
 import { useAtom } from 'jotai';
-import { BigNumber } from 'ethers';
-import { Button } from '@mui/material';
+import { Button, Box } from '@mui/material';
 import { swapperContract } from '../states';
 import { TTokenBalance } from '../types';
 import HistoryModal from './HistoryModal';
 
 const buttonStyle = {
   borderRadius: '13px',
+  fontFamily: 'Monospace',
+  fontSize: '20px',
+  fontWeight: 'bold',
+};
+
+const boxStyle = {
+  display: 'flex',
+  justifyContent: 'space-around',
+  borderRadius: 4,
+  bgcolor: 'secondary.main',
+  p: 1,
   fontFamily: 'Monospace',
   fontSize: '20px',
   fontWeight: 'bold',
@@ -26,7 +37,7 @@ const Withdraw = () => {
     swapper.queryFilter(withdrawFilter).then((events) => {
       setHistory(events.map((e) => ({
         token: e.args.token,
-        balance: e.args.balance.toString(),
+        balance: ethers.utils.formatUnits(e.args.balance, 18),
       })));
     });
   }, [historyModalState]);
@@ -38,7 +49,7 @@ const Withdraw = () => {
         ...ok,
         {
           token,
-          balance: balance.toString(),
+          balance: ethers.utils.formatUnits(balance, 18),
         },
       ]);
     });
@@ -51,13 +62,15 @@ const Withdraw = () => {
   return (
     <>
       {
-        withdrawnList.map((e, i) => (
-          <div
-            /* eslint-disable-next-line */
-            key={i}
-          >
-            {`${e.token} ${e.balance.toString()}`}
-          </div>
+        withdrawnList.map((log, i) => (
+          <Box
+            sx={boxStyle}
+          /* eslint-disable-next-line */
+          key={i}>
+            <div>{`${log.token}`}</div>
+            <div>{`${log.balance}`}</div>
+
+          </Box>
         ))
       }
       <Button
