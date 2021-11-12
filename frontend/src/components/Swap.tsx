@@ -5,8 +5,9 @@ import { useAtom } from 'jotai';
 import { AddressZero } from '@ethersproject/constants';
 import { CustomInput } from './CustomInput';
 import { swapperContract } from '../states';
-import { IToken } from '../types';
 import useToken from '../hooks/useToken';
+
+import { TOKENS } from '../tokens';
 
 import './SwapPool.css';
 
@@ -19,18 +20,7 @@ enum SwapState {
   EXACT_OUTPUT,
 }
 
-const tokens: IToken[] = [
-  {
-    name: 'DummyToken0',
-    symbol: 'DT0',
-    address: '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b',
-  },
-  {
-    name: 'DummyToken1',
-    symbol: 'DT1',
-    address: '0x2946259E0334f33A064106302415aD3391BeD384',
-  },
-];
+const tokens = Object.keys(TOKENS);
 
 const button = {
   borderRadius: 3,
@@ -57,23 +47,17 @@ const arrowStyle = {
   zIndex: 2,
 };
 
-const defaultToken: IToken = {
-  name: '',
-  symbol: '',
-  address: AddressZero,
-};
-
 const Swap: React.FC<ISwap> = () => {
   const [state, setState] = React.useState(SwapState.NO_INPUT_OUTPUT);
 
-  const [token0, setToken0] = React.useState(defaultToken);
-  const [token1, setToken1] = React.useState(defaultToken);
+  const [token0, setToken0] = React.useState(AddressZero);
+  const [token1, setToken1] = React.useState(AddressZero);
 
   const [amount0, setAmount0] = React.useState('');
   const [amount1, setAmount1] = React.useState('');
 
-  const tokenIn = useToken(token0.address);
-  const tokenOut = useToken(token1.address);
+  const tokenIn = useToken(token0);
+  const tokenOut = useToken(token1);
 
   const [swapper] = useAtom(swapperContract);
 
@@ -110,8 +94,8 @@ const Swap: React.FC<ISwap> = () => {
   };
 
   const tokensNotSelected = ():boolean => {
-    if (token0.address === AddressZero) return true;
-    if (token1.address === AddressZero) return true;
+    if (token0 === AddressZero) return true;
+    if (token1 === AddressZero) return true;
 
     return false;
   };
@@ -132,12 +116,12 @@ const Swap: React.FC<ISwap> = () => {
     /* Add try catch */
     if (state === SwapState.EXACT_INPUT) {
       const tx = await swapper.swapExactTokensIn(
-        token0.address, token1.address, amountIn, amountOut,
+        token0, token1, amountIn, amountOut,
       );
       await tx.wait();
     } else if (state === SwapState.EXACT_OUTPUT) {
       const tx = await swapper.swapExactTokensOut(
-        token0.address, token1.address, amountIn, amountOut,
+        token0, token1, amountIn, amountOut,
       );
       await tx.wait();
     } else {
@@ -172,7 +156,7 @@ const Swap: React.FC<ISwap> = () => {
     if (amount0 === '') return;
 
     const amountIn = tokenIn.expand(amount0);
-    const path: string[] = [token0.address, token1.address];
+    const path: string[] = [token0, token1];
     swapper.getAmountsOut(amountIn, path).then((amounts) => {
       setAmount1(tokenOut.shrink(amounts[1]));
     });
@@ -184,7 +168,7 @@ const Swap: React.FC<ISwap> = () => {
     if (amount1 === '') return;
 
     const amountOut = tokenOut.expand(amount1);
-    const path: string[] = [token0.address, token1.address];
+    const path: string[] = [token0, token1];
     swapper.getAmountsIn(amountOut, path).then((amounts) => {
       setAmount0(tokenOut.shrink(amounts[0]));
     });
@@ -196,7 +180,7 @@ const Swap: React.FC<ISwap> = () => {
         <CustomInput
           tokens={
             tokens.filter(
-              (token) => token.address !== token0.address && token.address !== token1.address,
+              (token) => token !== token0 && token !== token1,
             )
           }
           token={token0}
@@ -208,7 +192,7 @@ const Swap: React.FC<ISwap> = () => {
         <CustomInput
           tokens={
             tokens.filter(
-              (token) => token.address !== token0.address && token.address !== token1.address,
+              (token) => token !== token0 && token !== token1,
             )
           }
           token={token1}

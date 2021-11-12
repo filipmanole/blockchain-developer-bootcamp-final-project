@@ -1,43 +1,24 @@
-import React, { Key } from 'react';
+import React from 'react';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import {
-  Box, Button, Modal,
-} from '@mui/material';
-
-import { AddressZero } from '@ethersproject/constants';
-import { IToken } from '../types';
-
+import { Box, Button } from '@mui/material';
+import ChooseTokenModal from './ChooseTokenModal';
 import './CustomInput.css';
+import { TOKENS } from '../tokens';
 
-export interface ICustomInput {
-  tokens: IToken[],
-  token: IToken,
+export interface ICustomInput<T=string> {
+  tokens: T[],
+  token: T,
   amount: string,
-  setToken: (token: IToken) => void,
+  setToken: (token: T) => void,
   setAmount: (input: string) => void,
   onInputChange?: () => void,
 }
-
-const textStyle = { fontFamily: 'Monospace', fontWeight: 'bold', textAlign: 'center' };
 
 const boxStyle = {
   display: 'flex',
   alignItems: 'center',
   borderRadius: 4,
   bgcolor: 'secondary.main',
-  p: 1,
-};
-
-const modalStyle = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 500,
-  bgcolor: 'background.paper',
-  borderRadius: 4,
-  boxShadow: 24,
-  border: '1px solid grey',
   p: 1,
 };
 
@@ -65,12 +46,12 @@ export const CustomInput: React.FC<ICustomInput> = ({
         id="symbol-button"
         variant="contained"
       >
-        {token.address !== AddressZero ? token.symbol : 'Select a Token'}
+        {TOKENS[token] ? TOKENS[token].symbol : 'Select a Token'}
         <KeyboardArrowDownIcon />
       </Button>
       <input
         autoComplete="off"
-        disabled={token.address === AddressZero}
+        disabled={!TOKENS[token]}
         id="amount-input"
         placeholder="0.0"
         value={amount}
@@ -81,36 +62,7 @@ export const CustomInput: React.FC<ICustomInput> = ({
         }}
       />
 
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box
-          id="select-modal"
-          sx={modalStyle}
-        >
-          {
-            tokens.length === 0
-              ? <p style={textStyle as React.CSSProperties}>No tokens available...</p>
-              : tokens.map((t) => (
-                <Button
-                  key={t.address as Key}
-                  fullWidth
-                  variant="contained"
-                  id="content-button"
-                  onClick={() => {
-                    setToken(t);
-                    handleClose();
-                  }}
-                >
-                  {t.symbol}
-                </Button>
-              ))
-          }
-        </Box>
-      </Modal>
+      <ChooseTokenModal open={open} onClose={handleClose} tokens={tokens} setToken={setToken} />
     </Box>
   );
 };
