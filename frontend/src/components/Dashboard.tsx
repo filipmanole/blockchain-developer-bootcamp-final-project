@@ -8,6 +8,7 @@ import { appMode } from '../states';
 import Swap from './Swap';
 import Pool from './Pool';
 import Menu from './Menu';
+import Withdraw from './Withdraw';
 import Signature from './Signature';
 
 import injected from '../connectors';
@@ -65,15 +66,7 @@ const Dashboard = () => {
       <Menu />
       {mode === 'swap' && <Swap />}
       {mode === 'pool' && <Pool />}
-      {mode === 'withdraw' && (
-      <Button
-        sx={buttonStyle}
-        variant="contained"
-        fullWidth
-      >
-        Withdraw
-      </Button>
-      )}
+      {mode === 'withdraw' && <Withdraw />}
       <Signature />
     </Paper>
   );

@@ -24,7 +24,7 @@ contract Swapper is Ownable {
   );
   event SwappedExactInput();
   event SwappedExactOutput();
-  event Withdrawn();
+  event Withdrawn(address token, uint256 balance);
 
   constructor(address _factory, address _router) {
     factory = IUniswapV2Factory(_factory);
@@ -161,13 +161,13 @@ contract Swapper is Ownable {
       uint256 balance = IERC20(tokens[i]).balanceOf(address(this));
       IERC20(tokens[i]).transfer(owner(), balance);
 
+      emit Withdrawn(tokens[i], balance);
+
       delete exist[tokens[i]];
       delete tokens[i];
     }
 
     tokensLen = 0;
-
-    emit Withdrawn();
   }
 
   function getAmountsOut(uint256 amountIn, address[] memory path)
