@@ -23,12 +23,6 @@ const useToken = (tokenAddress: string, decimals: number = 18): IUseToken => {
   const expand = (num: string) => ethers.utils.parseUnits(num, decimals);
   const shrink = (num: BigNumber) => ethers.utils.formatUnits(num, decimals);
 
-  // const expand = (num: number) => BigNumber.from(num).mul(BigNumber.from(10).pow(decimals));
-  // const shrink = (num: BigNumber) => num.div(BigNumber.from(10).pow(decimals)).toString();
-
-  // const expand = (num: number) => BigNumber.from(num * 10 ** decimals);
-  // const shrink = (num: BigNumber) => num.toNumber() / 10 ** decimals;
-
   const approve = async (delegate: string, amount: BigNumber) => {
     const txn = await token.approve(delegate, amount);
     await txn.wait();
