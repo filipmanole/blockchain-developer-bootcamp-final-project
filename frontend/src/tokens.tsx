@@ -13,4 +13,4 @@ export const TOKENS: TTokenDictionary = {
   },
 };
 
-export default TOKENS;
+export const getTokenAddresses = () => Object.keys(TOKENS);

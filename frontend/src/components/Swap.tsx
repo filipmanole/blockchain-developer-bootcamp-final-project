@@ -7,7 +7,7 @@ import { CustomInput } from './CustomInput';
 import { swapperContract } from '../states';
 import useToken from '../hooks/useToken';
 
-import { TOKENS } from '../tokens';
+import { getTokenAddresses } from '../tokens';
 
 import './SwapPool.css';
 
@@ -20,7 +20,7 @@ enum SwapState {
   EXACT_OUTPUT,
 }
 
-const tokens = Object.keys(TOKENS);
+const tokens = getTokenAddresses();
 
 const button = {
   borderRadius: 3,

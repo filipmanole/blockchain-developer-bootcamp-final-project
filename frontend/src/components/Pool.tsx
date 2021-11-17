@@ -6,14 +6,14 @@ import { CustomInput } from './CustomInput';
 import { swapperContract } from '../states';
 import useToken from '../hooks/useToken';
 
-import { TOKENS } from '../tokens';
+import { getTokenAddresses } from '../tokens';
 
 import './SwapPool.css';
 
 export interface IPool {
 }
 
-const tokens = Object.keys(TOKENS);
+const tokens = getTokenAddresses();
 
 const button = {
   borderRadius: 3,
