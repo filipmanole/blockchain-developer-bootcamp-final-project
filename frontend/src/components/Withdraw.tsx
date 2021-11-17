@@ -6,6 +6,8 @@ import { swapperContract } from '../states';
 import { TTokenBalance } from '../types';
 import HistoryModal from './HistoryModal';
 
+import { getDecimals } from '../tokens';
+
 const buttonStyle = {
   borderRadius: '13px',
   fontFamily: 'Monospace',
@@ -37,7 +39,7 @@ const Withdraw = () => {
     swapper.queryFilter(withdrawFilter).then((events) => {
       setHistory(events.map((e) => ({
         token: e.args.token,
-        balance: ethers.utils.formatUnits(e.args.balance, 18),
+        balance: ethers.utils.formatUnits(e.args.balance, getDecimals(e.args.token)),
       })));
     });
   }, [historyModalState]);
@@ -49,7 +51,7 @@ const Withdraw = () => {
         ...ok,
         {
           token,
-          balance: ethers.utils.formatUnits(balance, 18),
+          balance: ethers.utils.formatUnits(balance, getDecimals(token)),
         },
       ]);
     });

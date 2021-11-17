@@ -13,4 +13,8 @@ export const TOKENS: TTokenDictionary = {
   },
 };
 
+export const getName = (address: string) => TOKENS[address].name;
+export const getSymbol = (address : string) => TOKENS[address].symbol;
+export const getDecimals = (address:string) => TOKENS[address].decimals;
+
 export const getTokenAddresses = () => Object.keys(TOKENS);
