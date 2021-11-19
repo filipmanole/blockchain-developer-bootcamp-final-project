@@ -14,3 +14,10 @@ export const swapperContract = atom(null as Swapper);
 export const signerAccount = atom(null as Signer);
 
 export const connectModalState = atom(false);
+
+/* Transactions status */
+type TTxnStatus = 'NOT_SUBMITED' | 'LOADING' | 'COMPLETE' | 'ERROR';
+export const transactionStatus = atom('NOT_SUBMITED' as TTxnStatus);
+export const transactionMessage = atom('');
+
+export const appError = atom(false);

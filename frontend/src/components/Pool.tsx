@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { useAtom } from 'jotai';
 import { AddressZero } from '@ethersproject/constants';
 import { CustomInput } from './CustomInput';
-import { swapperContract } from '../states';
+import { swapperContract, transactionStatus, transactionMessage } from '../states';
 import useToken from '../hooks/useToken';
 
 import { getTokenAddresses } from '../tokens';
@@ -23,6 +23,9 @@ const button = {
 };
 
 const Pool: React.FC<IPool> = () => {
+  const [, setTxStatus] = useAtom(transactionStatus);
+  const [, setTxMessage] = useAtom(transactionMessage);
+
   const [token0, setToken0] = React.useState(AddressZero);
   const [token1, setToken1] = React.useState(AddressZero);
 
@@ -49,6 +52,8 @@ const Pool: React.FC<IPool> = () => {
     const amountToken1 = useToken1.expand(amount1);
 
     try {
+      setTxMessage('Providing Liquidity');
+      setTxStatus('LOADING');
       await useToken0.approve(swapper.address, amountToken0);
       await useToken1.approve(swapper.address, amountToken1);
 
@@ -59,8 +64,10 @@ const Pool: React.FC<IPool> = () => {
         amountToken1,
       );
       await txn.wait();
+      setTxStatus('COMPLETE');
     } catch (err) {
-      console.log(err);
+      setTxMessage('Error while providing liquidity');
+      setTxStatus('ERROR');
     }
   };
 
