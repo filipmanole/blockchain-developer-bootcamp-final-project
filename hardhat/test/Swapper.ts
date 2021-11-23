@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { Swapper, Swapper__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Router02, UniswapV2Router02__factory } from '../typechain';
+import { Swapper, Swapper__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Router02, UniswapV2Router02__factory, IUniswapV2Pair, IUniswapV2Pair__factory, IERC20, IERC20__factory } from '../typechain';
 import { BigNumber } from '@ethersproject/bignumber';
 import { ERC20PresetMinterPauser } from '../typechain/ERC20PresetMinterPauser';
 import { ERC20PresetMinterPauser__factory } from '../typechain/factories/ERC20PresetMinterPauser__factory';
@@ -93,7 +93,7 @@ describe("Swapper Contract", () => {
     expect(numberOfPairs.eq(0)).to.be.true;
   });
 
-  it("should emit PairAdded event", async ()=> {
+  it("should emit LiquidityAdded event", async ()=> {
     const DT0amount: BigNumber = expand(500);
     const DT1amount: BigNumber = expand(500);
 
@@ -112,8 +112,8 @@ describe("Swapper Contract", () => {
 
     /* Provider should add a pair of (DT0, DT1) in the pool */
     await expect(
-      swapper.connect(provider).addLiquidity(DT0.address, DT0amount, DT1.address, DT1amount)
-    ).to.emit(swapper, "PairAdded");
+      swapper.connect(provider).addLiquidity(DT0.address, DT1.address, DT0amount, DT1amount, 1, 1)
+    ).to.emit(swapper, "LiquidityAdded");
   });
 
   it("should be one pair in the liquidity pool", async () => {
@@ -351,5 +351,74 @@ describe("Swapper Contract", () => {
 
     expect(newOwnerDT0.eq(ownerDT0.add(swapperDT0))).to.be.true;
     expect(newOwnerDT1.eq(ownerDT1.add(swapperDT1))).to.be.true;
+  });
+
+  it("should remove 400 tokens from provider's balace", async () => {
+    /* Provider should have only one lp token */
+    const lpTokens = await swapper.connect(provider).getLpTokens();
+    expect(lpTokens.length).to.be.eq(1);
+
+    /* Getting the only liquidity token */
+    const lpToken = IUniswapV2Pair__factory.connect(lpTokens[0], provider);
+
+    /* Getting tokens of the pair */
+    const token0 = IERC20__factory.connect(await lpToken.token0(), provider);
+    const token1 = IERC20__factory.connect(await lpToken.token1(), provider);
+
+    /* Getting provider's balances for pair tokens */
+    const providerT0: BigNumber = await token0.balanceOf(provider.address);
+    const providerT1: BigNumber = await token1.balanceOf(provider.address);
+
+    /* There should be ~500 LPDT0DT1 in provider's balance */
+    const lpBalance = await lpToken.balanceOf(provider.address);
+    const lpTokenToRemove = expand(400);
+    expect(lpBalance.gt(lpTokenToRemove)).to.be.true;
+
+    const [amount0, amount1] = await swapper.connect(provider).computeLiquidityShareValue(lpToken.address, lpTokenToRemove);
+
+    /* Removing 400 liquidity tokens */
+    tx = await lpToken.connect(provider).approve(swapper.address, lpTokenToRemove);
+    await tx.wait();
+    await swapper.connect(provider).removeLiquidity(lpToken.address, lpTokenToRemove, token0.address, token1.address, amount0, amount1);
+
+    /* After removing all liquidity, the provider should have 0 of liquidity tokens */
+    const newBalance = await lpToken.balanceOf(provider.address);
+    expect(newBalance.eq(lpBalance.sub(lpTokenToRemove))).to.be.true;
+
+    /* Getting provider's balances */
+    const newProviderT0: BigNumber = await token0.balanceOf(provider.address);
+    const newProviderT1: BigNumber = await token1.balanceOf(provider.address);
+    expect(newProviderT0.eq(providerT0.add(amount0))).to.be.true;
+    expect(newProviderT1.eq(providerT1.add(amount1))).to.be.true;
+  });
+
+  it("should remove the LPDT0DT1 liquidity tokens from the provider", async () => {
+    /* Provider should have only one lp token */
+    const lpTokens = await swapper.connect(provider).getLpTokens();
+    expect(lpTokens.length).to.be.eq(1);
+
+    /* Getting the only liquidity token */
+    const lpToken = IUniswapV2Pair__factory.connect(lpTokens[0], provider);
+
+    /* Getting tokens of the pair */
+    const token0 = IERC20__factory.connect(await lpToken.token0(), provider);
+    const token1 = IERC20__factory.connect(await lpToken.token1(), provider);
+
+    /* Getting the liquidity provider's token balance */
+    const lpBalance = await lpToken.balanceOf(provider.address);
+
+    /* Removing all liquidity */
+    tx = await lpToken.connect(provider).approve(swapper.address, lpBalance);
+    await tx.wait();
+    await swapper.connect(provider).removeLiquidity(lpToken.address, lpBalance, token0.address, token1.address, 1, 1);
+
+    /* After removing all liquidity, the provider should have 0 of liquidity tokens */
+    const newBalance = await lpToken.balanceOf(provider.address);
+    expect(newBalance.eq(0)).to.be.true;
+  });
+
+  it("should not be any liquidity tokens holded by provider", async () => {
+    const lpTokens = await swapper.connect(provider).getLpTokens();
+    expect(lpTokens.length).to.be.eq(0);
   });
 });
