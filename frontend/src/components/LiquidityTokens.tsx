@@ -10,6 +10,14 @@ interface ILiquidityTokens {
 
 type TAddressName = [string, string];
 
+const divStyle:React.CSSProperties = {
+  fontFamily: 'Monospace',
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+};
+
 const LiquidityTokens: React.FC<ILiquidityTokens> = ({ reload }) => {
   const [swapper] = useAtom(swapperContract);
 
@@ -44,28 +52,27 @@ const LiquidityTokens: React.FC<ILiquidityTokens> = ({ reload }) => {
 
   return (
     <>
-      {txStatus === 'LOADING' && <CircularProgress />}
+      {txStatus === 'LOADING' && (
+      <div style={divStyle}>
+        <CircularProgress />
+      </div>
+      )}
       {txStatus === 'COMPLETE'
       && (
         <>
           {
-            lpTokens.map((lpToken, i) => (
-              <div
+            lpTokens.length === 0 ? <div style={divStyle}>No liquidity provided...</div>
+              : lpTokens.map((lpToken, i) => (
+                <div
                 /* eslint-disable-next-line */
                 key={i}
-                style={{
-                  fontFamily: 'Monospace',
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                {lpToken[1]}
+                  style={divStyle}
+                >
+                  {lpToken[1]}
                 &nbsp;&nbsp;
-                <LPTokenInfo lpTokenAddress={lpToken[0]} />
-              </div>
-            ))
+                  <LPTokenInfo lpTokenAddress={lpToken[0]} />
+                </div>
+              ))
           }
         </>
       )}

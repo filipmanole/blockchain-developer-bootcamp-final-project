@@ -28,6 +28,8 @@ const modalStyle = {
 
   display: 'grid',
   gridAutoRows: 'auto',
+  justifyContent: 'center',
+  alignItems: 'center',
   rowGap: '10px',
 };
 
