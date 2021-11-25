@@ -7,6 +7,9 @@ import { Button, Box, Modal } from '@mui/material';
 import { swapperContract, signerAccount, connectModalState } from '../states';
 import { Swapper__factory } from '../typechain';
 
+import SlippageSelect from './SlippageSelect';
+import LiquidityTokens from './LiquidityTokens';
+
 import injected from '../connectors';
 
 interface IConnectModal {
@@ -25,7 +28,6 @@ const modalStyle = {
 
   display: 'grid',
   gridAutoRows: 'auto',
-  justifyItems: 'center',
   rowGap: '10px',
 };
 
@@ -76,19 +78,30 @@ const ConnectModal: React.FC<IConnectModal> = () => {
         sx={modalStyle}
       >
         {
-      active
-        ? (
-          <>
-            <h3 style={{ fontFamily: 'Monospace' }}>{account}</h3>
-            <Button fullWidth sx={buttonStyle} onClick={() => { deconnect(); setModalState(false); }} variant="contained"> Deconnect </Button>
-          </>
-        ) : (
-          <>
-            <h3 style={{ fontFamily: 'Monospace' }}>Not Connected</h3>
-            <Button fullWidth sx={buttonStyle} onClick={() => { connect(); setModalState(false); }} variant="contained"> Connect </Button>
-          </>
-        )
-    }
+          active
+            ? (
+              <>
+                <h3 style={{ fontFamily: 'Monospace' }}>{account}</h3>
+                <div
+                  style={{
+                    display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center',
+                  }}
+                >
+                  <div style={{ fontFamily: 'Monospace' }}> Slippage </div>
+                  <SlippageSelect />
+                </div>
+                <hr />
+                <LiquidityTokens reload={modalState} />
+                <hr />
+                <Button fullWidth sx={buttonStyle} onClick={() => { deconnect(); setModalState(false); }} variant="contained"> Deconnect </Button>
+              </>
+            ) : (
+              <>
+                <h3 style={{ fontFamily: 'Monospace' }}>Not Connected</h3>
+                <Button fullWidth sx={buttonStyle} onClick={() => { connect(); setModalState(false); }} variant="contained"> Connect </Button>
+              </>
+            )
+        }
       </Box>
     </Modal>
   );

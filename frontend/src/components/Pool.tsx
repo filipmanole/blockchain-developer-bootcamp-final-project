@@ -59,9 +59,11 @@ const Pool: React.FC<IPool> = () => {
 
       const txn = await swapper.addLiquidity(
         token0,
-        amountToken0,
         token1,
+        amountToken0,
         amountToken1,
+        1,
+        1,
       );
       await txn.wait();
       setTxStatus('COMPLETE');
