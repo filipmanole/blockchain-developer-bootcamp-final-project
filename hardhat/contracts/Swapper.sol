@@ -169,7 +169,10 @@ contract Swapper is Ownable {
     IUniswapV2Pair lpToken,
     uint256 lpTokenAmount
   ) external view returns (uint256 amount0, uint256 amount1) {
-    require(lpTokenAmount <= lpToken.balanceOf(msg.sender));
+    require(
+      lpTokenAmount <= lpToken.balanceOf(msg.sender),
+      "Not enough balance..."
+    );
 
     uint256 totalSupply = lpToken.totalSupply();
     (uint256 reserves0, uint256 reserves1, ) = lpToken.getReserves();

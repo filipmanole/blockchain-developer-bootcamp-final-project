@@ -6,6 +6,7 @@ import {
 import InfoIcon from '@mui/icons-material/Info';
 import { useAtom } from 'jotai';
 import { BigNumber, ethers } from 'ethers';
+import CheckIcon from '@mui/icons-material/Check';
 import { IUniswapV2Pair__factory } from '../typechain';
 import { getSymbol, getDecimals } from '../tokens';
 
@@ -25,7 +26,9 @@ const buttonStyle = {
 const LPTokenInfo: React.FC<ILPTokenInfo> = ({ lpTokenAddress }) => {
   const [signer] = useAtom(signerAccount);
   const [swapper] = useAtom(swapperContract);
-  const [txStatus, setTxStatus] = React.useState<TTxnStatus>('NOT_SUBMITED');
+
+  const [errorMessage, setErrorMessage] = React.useState<string>('');
+  const [txStatus, setTxStatus] = React.useState<TTxnStatus | 'REMOVED'>('NOT_SUBMITED');
 
   const lpToken = IUniswapV2Pair__factory.connect(lpTokenAddress, signer);
   const [lpBalance, setLpBalance] = React.useState<BigNumber>(BigNumber.from(0));
@@ -55,42 +58,68 @@ const LPTokenInfo: React.FC<ILPTokenInfo> = ({ lpTokenAddress }) => {
 
   const init = async () => {
     setTxStatus('LOADING');
-    setToken0(await lpToken.token0());
-    setToken1(await lpToken.token1());
-    // setTxStatus('COMPLETE');
+    try {
+      setToken0(await lpToken.token0());
+      setToken1(await lpToken.token1());
+    } catch (err) {
+      setErrorMessage('Error getting tokens from the liquidity pair...');
+      setTxStatus('ERROR');
+    }
   };
 
   const setBalance = async () => {
     setTxStatus('LOADING');
-    const accountAddress = await signer.getAddress();
-    const balance = await lpToken.balanceOf(accountAddress);
-    setLpBalance(balance);
-    setLpBalanceToRemove(balance);
-    // setTxStatus('COMPLETE');
+    try {
+      const accountAddress = await signer.getAddress();
+      const balance = await lpToken.balanceOf(accountAddress);
+      setLpBalance(balance);
+      setLpBalanceToRemove(balance);
+    } catch (err) {
+      setErrorMessage('Error getting liquidity balance...');
+      setTxStatus('ERROR');
+    }
   };
 
   const setAmounts = async (amount) => {
     setTxStatus('LOADING');
-    const [a0, a1] = await swapper.computeLiquidityShareValue(lpToken.address, amount);
-    setAmount0(a0);
-    setAmount1(a1);
-    setTxStatus('COMPLETE');
+    try {
+      const [a0, a1] = await swapper.computeLiquidityShareValue(lpToken.address, amount);
+      setAmount0(a0);
+      setAmount1(a1);
+      setTxStatus('COMPLETE');
+    } catch (err) {
+      setErrorMessage('Input error...');
+      setTxStatus('ERROR');
+    }
   };
+
+  const removeLpToken = async () => {
+    setTxStatus('LOADING');
+    try {
+      lpToken.approve(swapper.address, lpBalanceToRemove);
+      await swapper.removeLiquidity(lpTokenAddress, lpBalanceToRemove, token0, token1, 1, 1);
+      setTxStatus('REMOVED');
+    } catch (err) {
+      setErrorMessage('Error removing liquidity...');
+      setTxStatus('ERROR');
+    }
+  };
+
+  /* eslint-disable-next-line */
+  const isNumeric = (str:string): boolean => !isNaN(str as unknown as number) && !isNaN(parseFloat(str));
 
   React.useEffect(() => {
     init();
   }, []);
 
   React.useEffect(() => {
-    if (open) setBalance();
+    if (!open) setTxStatus('NOT_SUBMITED');
+    if (open && token0 && token1) setBalance();
   }, [open]);
 
   React.useEffect(() => {
     if (open) setAmounts(lpBalanceToRemove);
   }, [lpBalanceToRemove]);
-
-  /* eslint-disable-next-line */
-  const isNumeric = (str:string): boolean => !isNaN(str as unknown as number) && !isNaN(parseFloat(str));
 
   return (
     <div>
@@ -127,6 +156,7 @@ const LPTokenInfo: React.FC<ILPTokenInfo> = ({ lpTokenAddress }) => {
               alignItems: 'center',
             }}
             >
+              {txStatus === 'REMOVED' && <CheckIcon />}
               {txStatus === 'LOADING' && <CircularProgress />}
               {txStatus === 'COMPLETE' && (
               <>
@@ -135,6 +165,7 @@ const LPTokenInfo: React.FC<ILPTokenInfo> = ({ lpTokenAddress }) => {
                 <div>{`${getSymbol(token1)}: ${ethers.utils.formatUnits(amount1, getDecimals(token1))}`}</div>
               </>
               )}
+              {txStatus === 'ERROR' && <div style={{ padding: '10px' }}>{errorMessage}</div>}
             </Paper>
             <input
               style={{
@@ -147,9 +178,8 @@ const LPTokenInfo: React.FC<ILPTokenInfo> = ({ lpTokenAddress }) => {
                 textAlign: 'right',
               }}
               autoComplete="off"
-              // id="amount-input"
               value={enteredAmount}
-              placeholder="0.0"
+              placeholder="Amount to remove"
               onChange={(e) => {
                 if (e.target.value === '') { setEnteredAmount(''); setLpBalanceToRemove(ethers.utils.parseUnits('0.0')); }
                 if (isNumeric(e.target.value)) {
@@ -162,6 +192,7 @@ const LPTokenInfo: React.FC<ILPTokenInfo> = ({ lpTokenAddress }) => {
               sx={buttonStyle}
               fullWidth
               variant="outlined"
+              onClick={() => removeLpToken()}
             >
               Remove
             </Button>
