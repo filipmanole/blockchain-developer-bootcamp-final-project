@@ -49,7 +49,7 @@ contract Swapper is Ownable {
     _lpTokens = lpTokens[msg.sender];
   }
 
-  function getLpTokenNames(address lpToken)
+  function getLpTokenName(address lpToken)
     public
     view
     returns (string memory _lpTokenName)
@@ -169,6 +169,8 @@ contract Swapper is Ownable {
     IUniswapV2Pair lpToken,
     uint256 lpTokenAmount
   ) external view returns (uint256 amount0, uint256 amount1) {
+    require(lpTokenAmount <= lpToken.balanceOf(msg.sender));
+
     uint256 totalSupply = lpToken.totalSupply();
     (uint256 reserves0, uint256 reserves1, ) = lpToken.getReserves();
 

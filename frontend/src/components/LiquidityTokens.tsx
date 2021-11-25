@@ -24,7 +24,7 @@ const LiquidityTokens: React.FC<ILiquidityTokens> = ({ reload }) => {
     const lpTokensPromises = lpTokenAddresses.map(
       async (address):Promise<TAddressName> => [
         address,
-        await swapper.getLpTokenNames(address),
+        await swapper.getLpTokenName(address),
       ],
     );
 
