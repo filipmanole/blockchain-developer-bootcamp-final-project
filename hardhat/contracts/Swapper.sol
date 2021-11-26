@@ -18,9 +18,9 @@ contract Swapper is Ownable {
   mapping(uint256 => address) private tokens;
   mapping(address => bool) private exist;
 
-  IUniswapV2Factory public immutable factory;
-  IUniswapV2Router02 public immutable router;
-  IWETH public immutable WETH;
+  IUniswapV2Factory private immutable factory;
+  IUniswapV2Router02 private immutable router;
+  IWETH private immutable WETH;
 
   /* Events */
   event LiquidityAdded(
@@ -58,7 +58,7 @@ contract Swapper is Ownable {
   }
 
   function sortTokens(address tokenA, address tokenB)
-    internal
+    private
     pure
     returns (address token0, address token1)
   {
@@ -68,7 +68,7 @@ contract Swapper is Ownable {
   }
 
   function findLpToken(address account, address lpToken)
-    internal
+    private
     view
     returns (uint256 index)
   {
@@ -81,14 +81,14 @@ contract Swapper is Ownable {
     return index;
   }
 
-  function addLpToken(address account, address lpToken) internal {
+  function addLpToken(address account, address lpToken) private {
     uint256 index = findLpToken(account, lpToken);
 
     if (lpTokens[account].length == 0 || index != lpTokens[account].length)
       lpTokens[account].push(lpToken);
   }
 
-  function removeLpToken(address account, address lpToken) internal {
+  function removeLpToken(address account, address lpToken) private {
     uint256 index = findLpToken(account, lpToken);
     if (index == lpTokens[account].length) return;
 
