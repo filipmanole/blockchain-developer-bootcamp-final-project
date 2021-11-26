@@ -11,16 +11,17 @@ import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 
 contract Swapper is Ownable {
+  /* State */
+  IUniswapV2Factory private immutable factory;
+  IUniswapV2Router02 private immutable router;
+  IWETH private immutable WETH;
+
   mapping(address => address[]) public lpTokens;
   mapping(address => string) public lpTokenNames;
 
   uint256 private tokensLen;
   mapping(uint256 => address) private tokens;
   mapping(address => bool) private exist;
-
-  IUniswapV2Factory private immutable factory;
-  IUniswapV2Router02 private immutable router;
-  IWETH private immutable WETH;
 
   /* Events */
   event LiquidityAdded(
@@ -45,6 +46,17 @@ contract Swapper is Ownable {
     tokensLen = 0;
   }
 
+  /* Internal functions: helpers */
+  function sortTokens(address tokenA, address tokenB)
+    private
+    pure
+    returns (address token0, address token1)
+  {
+    require(tokenA != tokenB, "UniswapV2Library: IDENTICAL_ADDRESSES");
+    (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+    require(token0 != address(0), "UniswapV2Library: ZERO_ADDRESS");
+  }
+
   function getLpTokens() public view returns (address[] memory _lpTokens) {
     _lpTokens = lpTokens[msg.sender];
   }
@@ -55,16 +67,6 @@ contract Swapper is Ownable {
     returns (string memory _lpTokenName)
   {
     _lpTokenName = lpTokenNames[lpToken];
-  }
-
-  function sortTokens(address tokenA, address tokenB)
-    private
-    pure
-    returns (address token0, address token1)
-  {
-    require(tokenA != tokenB, "UniswapV2Library: IDENTICAL_ADDRESSES");
-    (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-    require(token0 != address(0), "UniswapV2Library: ZERO_ADDRESS");
   }
 
   function findLpToken(address account, address lpToken)
@@ -117,6 +119,8 @@ contract Swapper is Ownable {
   function addFee(uint256 amount) private pure returns (uint256) {
     return (1000 * amount) / 999;
   }
+
+  /* Public functions */
 
   function addLiquidity(
     address token0,
@@ -218,6 +222,28 @@ contract Swapper is Ownable {
     emit LiquidityRemoved(msg.sender, address(lpToken), lpTokenAmount);
   }
 
+  function getAmountsOut(uint256 amountIn, address[] memory path)
+    public
+    view
+    returns (uint256[] memory amounts)
+  {
+    uint256[] memory _amounts = router.getAmountsOut(subFee(amountIn), path);
+    _amounts[0] = amountIn;
+
+    return _amounts;
+  }
+
+  function getAmountsIn(uint256 amountOut, address[] memory path)
+    public
+    view
+    returns (uint256[] memory amounts)
+  {
+    uint256[] memory _amounts = router.getAmountsIn(amountOut, path);
+    _amounts[0] = addFee(_amounts[0]);
+
+    return _amounts;
+  }
+
   function swapExactTokensIn(
     address tokenIn,
     address tokenOut,
@@ -298,27 +324,5 @@ contract Swapper is Ownable {
     }
 
     tokensLen = 0;
-  }
-
-  function getAmountsOut(uint256 amountIn, address[] memory path)
-    public
-    view
-    returns (uint256[] memory amounts)
-  {
-    uint256[] memory _amounts = router.getAmountsOut(subFee(amountIn), path);
-    _amounts[0] = amountIn;
-
-    return _amounts;
-  }
-
-  function getAmountsIn(uint256 amountOut, address[] memory path)
-    public
-    view
-    returns (uint256[] memory amounts)
-  {
-    uint256[] memory _amounts = router.getAmountsIn(amountOut, path);
-    _amounts[0] = addFee(_amounts[0]);
-
-    return _amounts;
   }
 }
