@@ -34,8 +34,7 @@ contract Swapper is Ownable {
     address lpToken,
     uint256 amount
   );
-  event SwappedExactInput();
-  event SwappedExactOutput();
+  event Swapped(address indexed trader, address tokenIn, uint balanceIn, address tokenOut, uint balanceOut);
   event Withdrawn(address token, uint256 balance);
 
   constructor(address _factory, address _router) {
@@ -265,7 +264,8 @@ contract Swapper is Ownable {
     address[] memory path = new address[](2);
     path[0] = tokenIn;
     path[1] = tokenOut;
-    router.swapExactTokensForTokens(
+
+    uint256[] memory _amounts = router.swapExactTokensForTokens(
       newAmountIn,
       amountOutMin,
       path,
@@ -275,7 +275,7 @@ contract Swapper is Ownable {
 
     markToken(tokenIn);
 
-    emit SwappedExactInput();
+    emit Swapped(msg.sender, tokenIn, _amounts[0],tokenOut, _amounts[1]);
   }
 
   function swapExactTokensOut(
@@ -299,7 +299,7 @@ contract Swapper is Ownable {
     path[0] = tokenIn;
     path[1] = tokenOut;
 
-    router.swapTokensForExactTokens(
+    uint256[] memory _amounts = router.swapTokensForExactTokens(
       amountOut,
       newAmountInMax,
       path,
@@ -309,7 +309,7 @@ contract Swapper is Ownable {
 
     markToken(tokenIn);
 
-    emit SwappedExactOutput();
+    emit Swapped(msg.sender, tokenIn, _amounts[0],tokenOut, _amounts[1]);
   }
 
   function withdraw() public onlyOwner {

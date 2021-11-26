@@ -144,7 +144,7 @@ describe("Swapper Contract", () => {
     /* Swap exact DT0 into DT1 */
     await expect(
       swapper.connect(trader).swapExactTokensIn(DT0.address, DT1.address, amountIn, amountOut)
-    ).to.emit(swapper, "SwappedExactInput");
+    ).to.emit(swapper, "Swapped");
 
     /* Get trader's balances after performing the swap */
     const newTraderDT0: BigNumber = await DT0.balanceOf(trader.address);
@@ -178,7 +178,7 @@ describe("Swapper Contract", () => {
 
     await expect(
       swapper.connect(trader).swapExactTokensOut(DT0.address, DT1.address, amountIn, amountOut)
-    ).to.emit(swapper, "SwappedExactOutput");
+    ).to.emit(swapper, "Swapped");
 
     /* Get trader's balances after performing the swap */
     const newTraderDT0: BigNumber = await DT0.balanceOf(trader.address);
