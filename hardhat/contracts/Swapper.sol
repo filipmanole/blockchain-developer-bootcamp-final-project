@@ -359,10 +359,10 @@ contract Swapper is Ownable {
 
   /// @notice swapps an exact amount of input tokens for a minimum amount of output tokens
   /// @dev emits Swapped event
-  /// @param address tokenIn the address of the input token
-  /// @param address tokenOut the address of the output token
-  /// @param uint256 amountIn the amount of input tokens to send
-  /// @param uint256 amountOutMin the minimum amount of output tokens that must be received for the transaction not to revert
+  /// @param tokenIn the address of the input token
+  /// @param tokenOut the address of the output token
+  /// @param amountIn the amount of input tokens to send
+  /// @param amountOutMin the minimum amount of output tokens that must be received for the transaction not to revert
   function swapExactTokensIn(
     address tokenIn,
     address tokenOut,
@@ -400,10 +400,10 @@ contract Swapper is Ownable {
 
   /// @notice swapps a maximum amount of input tokens for an exact amount of output tokens
   /// @dev emits Swapped event
-  /// @param address tokenIn the address of the input token
-  /// @param address tokenOut the address of the output token
-  /// @param uint256 amountInMax the maximum amount of input tokens that can be required before the transaction reverts
-  /// @param uint256 amountOut the amount of output tokens to receive
+  /// @param tokenIn the address of the input token
+  /// @param tokenOut the address of the output token
+  /// @param amountInMax the maximum amount of input tokens that can be required before the transaction reverts
+  /// @param amountOut the amount of output tokens to receive
   function swapExactTokensOut(
     address tokenIn,
     address tokenOut,
