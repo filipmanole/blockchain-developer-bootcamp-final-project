@@ -12,8 +12,6 @@ import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 /// @title DEX based on UniswapV2 API
 /// @author Filip Manole
 /// @notice add/remove liquidity from pools, swap ERC20 tokens
-/// @dev all function calls are currently implemented without side effects
-/// @custom:experimental Educational purpose
 contract Swapper is Ownable {
   /* State variables */
 
@@ -31,10 +29,10 @@ contract Swapper is Ownable {
   /* Events */
 
   /// @notice event emited when liquidity is added into pool
-  /// @dev event emited if the pool does not exists and was created
-  /// @param account account address which performed a liquidity add action
+  /// @dev event emited when a pool is created or liquidity is provided
+  /// @param account account address which performed the liquidity add action
   /// @param lpToken liquidity token address that was added
-  /// @param amount amount of liquidity added
+  /// @param amount amount of added liquidity
   event LiquidityAdded(
     address indexed account,
     address lpToken,
@@ -42,9 +40,9 @@ contract Swapper is Ownable {
   );
 
   /// @notice event emited when liquidity is removed from pool
-  /// @param account account address which performed a liquidity remove action
+  /// @param account account address which performed the liquidity remove action
   /// @param lpToken liquidity token address that was removed
-  /// @param amount amount of liquidity removed
+  /// @param amount amount of removed liquidity
   event LiquidityRemoved(
     address indexed account,
     address lpToken,
@@ -52,7 +50,7 @@ contract Swapper is Ownable {
   );
 
   /// @notice event emited when tokens are swapped
-  /// @dev There is only one event for swapping a fixed input amount or changing for a fixed output amount
+  /// @dev same event for swapping a fixed input amount or swapping for a fixed output amount
   /// @param account account address which performed the swap
   /// @param tokenIn address of the input token
   /// @param balanceIn balance of the input token
@@ -106,8 +104,8 @@ contract Swapper is Ownable {
   /* Internal functions: helpers */
 
   /// @notice sorts two addresses
-  /// @dev this method is also provided in the Uniswap library function,
-  ///      but it could not be included, since it uses a different compiler version
+  /// @dev this method is also provided in the Uniswap Library contract,
+  ///      but the conctract could not be included, since it uses an older compiler version
   /// @param tokenA address of the first token
   /// @param tokenB address of the second token
   /// @return token0 first address of (tokenA, tokenB) in alphabetical order
@@ -218,7 +216,7 @@ contract Swapper is Ownable {
     amount1 = (lpTokenAmount * reserves1) / totalSupply;
   }
 
-  /// @notice adds liquidity in an existing or a new pool
+  /// @notice adds liquidity in an existing pool; if the pool does not exist, it will be created;
   /// @dev emmits LiquidityAdded
   /// @param token0 a pool token
   /// @param token1 a pool token
@@ -325,7 +323,7 @@ contract Swapper is Ownable {
 
   /* Core functionality for token swapping */
 
-  /// @notice Amount of tokens obtained for a fixed amount of tokens
+  /// @notice get amount of tokens obtained for a fixed amount of tokens
   /// @param amountIn amount of the provided tokens
   /// @param path path[0] address of the provided token
   ///             path[1] address of the resulted token
@@ -342,7 +340,7 @@ contract Swapper is Ownable {
     return _amounts;
   }
 
-  /// @notice Amount of tokens required to obtain a fixed amount of tokens
+  /// @notice get amount of tokens required to obtain a fixed amount of tokens
   /// @param amountOut amount of the desired tokens
   /// @param path path[0] address of the provided token
   ///             path[1] address of the desired token
@@ -361,10 +359,10 @@ contract Swapper is Ownable {
 
   /// @notice swapps an exact amount of input tokens for a minimum amount of output tokens
   /// @dev emits Swapped event
-  /// address tokenIn the address of the input token
-  /// address tokenOut the address of the output token
-  /// uint256 amountIn the amount of input tokens to send
-  /// uint256 amountOutMin the minimum amount of output tokens that must be received for the transaction not to revert
+  /// @param address tokenIn the address of the input token
+  /// @param address tokenOut the address of the output token
+  /// @param uint256 amountIn the amount of input tokens to send
+  /// @param uint256 amountOutMin the minimum amount of output tokens that must be received for the transaction not to revert
   function swapExactTokensIn(
     address tokenIn,
     address tokenOut,
@@ -402,10 +400,10 @@ contract Swapper is Ownable {
 
   /// @notice swapps a maximum amount of input tokens for an exact amount of output tokens
   /// @dev emits Swapped event
-  /// address tokenIn the address of the input token
-  /// address tokenOut the address of the output token
-  /// uint256 amountInMax the maximum amount of input tokens that can be required before the transaction reverts
-  /// uint256 amountOut the amount of output tokens to receive
+  /// @param address tokenIn the address of the input token
+  /// @param address tokenOut the address of the output token
+  /// @param uint256 amountInMax the maximum amount of input tokens that can be required before the transaction reverts
+  /// @param uint256 amountOut the amount of output tokens to receive
   function swapExactTokensOut(
     address tokenIn,
     address tokenOut,
@@ -440,7 +438,7 @@ contract Swapper is Ownable {
     emit Swapped(msg.sender, tokenIn, _amounts[0], tokenOut, _amounts[1]);
   }
 
-  /// @notice Transfers all accumultaed fees into owner acount
+  /// @notice transfers all accumultaed fees into owner acount
   /// @dev emits Withdrawn event for every ERC20 token transfer
   function withdraw() public onlyOwner {
     for (uint256 i = 0; i < tokensLen; i++) {
