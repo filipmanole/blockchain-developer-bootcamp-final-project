@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
@@ -10,8 +9,14 @@ import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 
+/// @title DEX based on UniswapV2 API
+/// @author Filip Manole
+/// @notice add/remove liquidity from pools, swap ERC20 tokens
+/// @dev all function calls are currently implemented without side effects
+/// @custom:experimental Educational purpose
 contract Swapper is Ownable {
-  /* State */
+  /* State variables */
+
   IUniswapV2Factory private immutable factory;
   IUniswapV2Router02 private immutable router;
   IWETH private immutable WETH;
@@ -24,19 +29,53 @@ contract Swapper is Ownable {
   mapping(address => bool) private exist;
 
   /* Events */
+
+  /// @notice event emited when liquidity is added into pool
+  /// @dev event emited if the pool does not exists and was created
+  /// @param account account address which performed a liquidity add action
+  /// @param lpToken liquidity token address that was added
+  /// @param amount amount of liquidity added
   event LiquidityAdded(
     address indexed account,
     address lpToken,
     uint256 amount
   );
+
+  /// @notice event emited when liquidity is removed from pool
+  /// @param account account address which performed a liquidity remove action
+  /// @param lpToken liquidity token address that was removed
+  /// @param amount amount of liquidity removed
   event LiquidityRemoved(
     address indexed account,
     address lpToken,
     uint256 amount
   );
-  event Swapped(address indexed trader, address tokenIn, uint balanceIn, address tokenOut, uint balanceOut);
+
+  /// @notice event emited when tokens are swapped
+  /// @dev There is only one event for swapping a fixed input amount or changing for a fixed output amount
+  /// @param account account address which performed the swap
+  /// @param tokenIn address of the input token
+  /// @param balanceIn balance of the input token
+  /// @param tokenOut address of the output token
+  /// @param balanceOut balance of the output token
+  event Swapped(
+    address indexed account,
+    address tokenIn,
+    uint256 balanceIn,
+    address tokenOut,
+    uint256 balanceOut
+  );
+
+  /// @notice event emited when tokens are transfered into the owner account
+  /// @param token address of the withdrawn token
+  /// @param balance balance of the withdrawn token
   event Withdrawn(address token, uint256 balance);
 
+  /* Constructor */
+
+  /// @notice constructor for the Swapper contract
+  /// @param _factory address of the Uniswap Factory contract
+  /// @param _router address of the Router02 Factory contract
   constructor(address _factory, address _router) {
     factory = IUniswapV2Factory(_factory);
     router = IUniswapV2Router02(_router);
@@ -45,21 +84,17 @@ contract Swapper is Ownable {
     tokensLen = 0;
   }
 
-  /* Internal functions: helpers */
-  function sortTokens(address tokenA, address tokenB)
-    private
-    pure
-    returns (address token0, address token1)
-  {
-    require(tokenA != tokenB, "UniswapV2Library: IDENTICAL_ADDRESSES");
-    (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-    require(token0 != address(0), "UniswapV2Library: ZERO_ADDRESS");
-  }
+  /* Getters */
 
+  /// @notice getter for the liquidity tokens of the sender
+  /// @return _lpTokens liquidity tokens holded by the sender
   function getLpTokens() public view returns (address[] memory _lpTokens) {
     _lpTokens = lpTokens[msg.sender];
   }
 
+  /// @notice getter for the symbol of a liquidity token
+  /// @param lpToken address of the liquidity token
+  /// @return _lpTokenName symbol of the given liquidity token
   function getLpTokenName(address lpToken)
     public
     view
@@ -68,6 +103,31 @@ contract Swapper is Ownable {
     _lpTokenName = lpTokenNames[lpToken];
   }
 
+  /* Internal functions: helpers */
+
+  /// @notice sorts two addresses
+  /// @dev this method is also provided in the Uniswap library function,
+  ///      but it could not be included, since it uses a different compiler version
+  /// @param tokenA address of the first token
+  /// @param tokenB address of the second token
+  /// @return token0 first address of (tokenA, tokenB) in alphabetical order
+  /// @return token1 second address of (tokenA, tokenB) in alphabetical order
+  function sortTokens(address tokenA, address tokenB)
+    private
+    pure
+    returns (address token0, address token1)
+  {
+    require(tokenA != tokenB, "IDENTICAL_ADDRESSES");
+    (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+    require(token0 != address(0), "ZERO_ADDRESS");
+  }
+
+  /// @notice searches for the address of a liquidity token in the account's balance
+  /// @dev the address of the holded liquidity tokens are stored into an array for each account.
+  /// @param account address of the holder
+  /// @param lpToken address of the liquidity token
+  /// @return index if token exists, index of the token address,
+  ///         otherwise the length of the array
   function findLpToken(address account, address lpToken)
     private
     view
@@ -82,6 +142,10 @@ contract Swapper is Ownable {
     return index;
   }
 
+  /// @notice adds a liquidity token from the account's balance
+  /// @dev the address of the holded liquidity tokens are stored into an array for each account.
+  /// @param account address of the holder
+  /// @param lpToken address of the liquidity token
   function addLpToken(address account, address lpToken) private {
     uint256 index = findLpToken(account, lpToken);
 
@@ -89,6 +153,10 @@ contract Swapper is Ownable {
       lpTokens[account].push(lpToken);
   }
 
+  /// @notice removes a liquidity token from the account's balance
+  /// @dev the address of the holded liquidity tokens are stored into an array for each account.
+  /// @param account address of the holder
+  /// @param lpToken address of the liquidity token
   function removeLpToken(address account, address lpToken) private {
     uint256 index = findLpToken(account, lpToken);
     if (index == lpTokens[account].length) return;
@@ -103,6 +171,8 @@ contract Swapper is Ownable {
     lpTokens[account].pop();
   }
 
+  /// @notice saves the address of the token holded by the contract as fee
+  /// @param token address of the token that will be marked
   function markToken(address token) private {
     if (exist[token] == true) return;
 
@@ -111,16 +181,54 @@ contract Swapper is Ownable {
     exist[token] = true;
   }
 
-  function subFee(uint256 amount) private pure returns (uint256) {
-    return amount - amount / 1000;
+  /// @notice substracts the 0.01% fee from a received amount
+  /// @param amount integer from which the fee will be substracted
+  /// @return amountSubFee amount remaining after substracting the fee
+  function subFee(uint256 amount) private pure returns (uint256 amountSubFee) {
+    amountSubFee = amount - amount / 1000;
   }
 
-  function addFee(uint256 amount) private pure returns (uint256) {
-    return (1000 * amount) / 999;
+  /// @notice adds the 0.01% fee to the a received amount
+  /// @param amount integer to which the fee will be added
+  /// @return amountPlusFee amount resulted after adding the fee
+  function addFee(uint256 amount) private pure returns (uint256 amountPlusFee) {
+    amountPlusFee = (1000 * amount) / 999;
   }
 
-  /* Public functions */
+  /* Core functionality for providing liquidity */
 
+  /// @notice computes the amounts of the two tokens inside a liquidity pair
+  /// @param lpToken address of a UniswapV2Pair
+  /// @param lpTokenAmount amount of the liquidity token
+  /// @return amount0 amount of the first token in the liquidity token
+  /// @return amount1 amount of the second token in the liquidity token
+  function computeLiquidityShareValue(
+    IUniswapV2Pair lpToken,
+    uint256 lpTokenAmount
+  ) external view returns (uint256 amount0, uint256 amount1) {
+    require(
+      lpTokenAmount <= lpToken.balanceOf(msg.sender),
+      "Not enough balance..."
+    );
+
+    uint256 totalSupply = lpToken.totalSupply();
+    (uint256 reserves0, uint256 reserves1, ) = lpToken.getReserves();
+
+    amount0 = (lpTokenAmount * reserves0) / totalSupply;
+    amount1 = (lpTokenAmount * reserves1) / totalSupply;
+  }
+
+  /// @notice adds liquidity in an existing or a new pool
+  /// @dev emmits LiquidityAdded
+  /// @param token0 a pool token
+  /// @param token1 a pool token
+  /// @param amount0 the amount of token0 to add as liquidity
+  /// @param amount1 the amount of token1 to add as liquidity
+  /// @param amountMin0 must be <= amount0
+  /// @param amountMin1 must be <= amount1
+  /// @return amountAdded0 the amount of token0 sent to the pool
+  /// @return amountAdded1 the amount of token1 sent to the pool
+  /// @return liquidity the amount of liquidity tokens minted
   function addLiquidity(
     address token0,
     address token1,
@@ -168,30 +276,24 @@ contract Swapper is Ownable {
     emit LiquidityAdded(msg.sender, lpToken, liquidity);
   }
 
-  function computeLiquidityShareValue(
-    IUniswapV2Pair lpToken,
-    uint256 lpTokenAmount
-  ) external view returns (uint256 amount0, uint256 amount1) {
-    require(
-      lpTokenAmount <= lpToken.balanceOf(msg.sender),
-      "Not enough balance..."
-    );
-
-    uint256 totalSupply = lpToken.totalSupply();
-    (uint256 reserves0, uint256 reserves1, ) = lpToken.getReserves();
-
-    amount0 = (lpTokenAmount * reserves0) / totalSupply;
-    amount1 = (lpTokenAmount * reserves1) / totalSupply;
-  }
-
+  /// @notice removes liquidity from a pool
+  /// @dev emits LiquidityRemoved
+  /// @param lpToken a liquidity token
+  /// @param lpTokenAmount amount of a liquidity token
+  /// @param token0 A token from the pair of lpToken liquidity token
+  /// @param token1 A token from the pair of lpToken liquidity token
+  /// @param amountMin0 The minimum amount of token0 that must be received for the transaction not to revert
+  /// @param amountMin1 The minimum amount of token1 that must be received for the transaction not to revert.
+  /// @return amount0 The amount of token0 received.
+  /// @return amount1 The amount of token1 received.
   function removeLiquidity(
     IUniswapV2Pair lpToken,
     uint256 lpTokenAmount,
     address token0,
     address token1,
-    uint256 amount0min,
-    uint256 amount1min
-  ) public returns (uint256 amountRemoved0, uint256 amountRemoved1) {
+    uint256 amountMin0,
+    uint256 amountMin1
+  ) public returns (uint256 amount0, uint256 amount1) {
     require(
       IUniswapV2Pair(lpToken).transferFrom(
         msg.sender,
@@ -206,21 +308,29 @@ contract Swapper is Ownable {
       "approve failed"
     );
 
-    (amountRemoved0, amountRemoved1) = router.removeLiquidity(
-      token0,
-      token1,
-      lpTokenAmount,
-      amount0min,
-      amount1min,
-      msg.sender,
-      block.timestamp
-    );
-
     uint256 balance = IUniswapV2Pair(lpToken).balanceOf(msg.sender);
     if (balance == 0) removeLpToken(msg.sender, address(lpToken));
     emit LiquidityRemoved(msg.sender, address(lpToken), lpTokenAmount);
+
+    (amount0, amount1) = router.removeLiquidity(
+      token0,
+      token1,
+      lpTokenAmount,
+      amountMin0,
+      amountMin1,
+      msg.sender,
+      block.timestamp
+    );
   }
 
+  /* Core functionality for token swapping */
+
+  /// @notice Amount of tokens obtained for a fixed amount of tokens
+  /// @param amountIn amount of the provided tokens
+  /// @param path path[0] address of the provided token
+  ///             path[1] address of the resulted token
+  /// @return amounts amounts[0] amount of the provided token
+  ///                 amounts[1] amount of the resulted token
   function getAmountsOut(uint256 amountIn, address[] memory path)
     public
     view
@@ -232,6 +342,12 @@ contract Swapper is Ownable {
     return _amounts;
   }
 
+  /// @notice Amount of tokens required to obtain a fixed amount of tokens
+  /// @param amountOut amount of the desired tokens
+  /// @param path path[0] address of the provided token
+  ///             path[1] address of the desired token
+  /// @return amounts amounts[0] amount of the provided token
+  ///                 amounts[1] amount of the desired token
   function getAmountsIn(uint256 amountOut, address[] memory path)
     public
     view
@@ -243,6 +359,12 @@ contract Swapper is Ownable {
     return _amounts;
   }
 
+  /// @notice swapps an exact amount of input tokens for a minimum amount of output tokens
+  /// @dev emits Swapped event
+  /// address tokenIn the address of the input token
+  /// address tokenOut the address of the output token
+  /// uint256 amountIn the amount of input tokens to send
+  /// uint256 amountOutMin the minimum amount of output tokens that must be received for the transaction not to revert
   function swapExactTokensIn(
     address tokenIn,
     address tokenOut,
@@ -261,6 +383,8 @@ contract Swapper is Ownable {
       "approve failed"
     );
 
+    markToken(tokenIn);
+
     address[] memory path = new address[](2);
     path[0] = tokenIn;
     path[1] = tokenOut;
@@ -273,11 +397,15 @@ contract Swapper is Ownable {
       block.timestamp
     );
 
-    markToken(tokenIn);
-
-    emit Swapped(msg.sender, tokenIn, _amounts[0],tokenOut, _amounts[1]);
+    emit Swapped(msg.sender, tokenIn, _amounts[0], tokenOut, _amounts[1]);
   }
 
+  /// @notice swapps a maximum amount of input tokens for an exact amount of output tokens
+  /// @dev emits Swapped event
+  /// address tokenIn the address of the input token
+  /// address tokenOut the address of the output token
+  /// uint256 amountInMax the maximum amount of input tokens that can be required before the transaction reverts
+  /// uint256 amountOut the amount of output tokens to receive
   function swapExactTokensOut(
     address tokenIn,
     address tokenOut,
@@ -295,6 +423,8 @@ contract Swapper is Ownable {
       "approve failed"
     );
 
+    markToken(tokenIn);
+
     address[] memory path = new address[](2);
     path[0] = tokenIn;
     path[1] = tokenOut;
@@ -307,11 +437,11 @@ contract Swapper is Ownable {
       block.timestamp
     );
 
-    markToken(tokenIn);
-
-    emit Swapped(msg.sender, tokenIn, _amounts[0],tokenOut, _amounts[1]);
+    emit Swapped(msg.sender, tokenIn, _amounts[0], tokenOut, _amounts[1]);
   }
 
+  /// @notice Transfers all accumultaed fees into owner acount
+  /// @dev emits Withdrawn event for every ERC20 token transfer
   function withdraw() public onlyOwner {
     for (uint256 i = 0; i < tokensLen; i++) {
       uint256 balance = IERC20(tokens[i]).balanceOf(address(this));
