@@ -4,7 +4,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useAtom } from 'jotai';
 import { AddressZero } from '@ethersproject/constants';
 import { CustomInput } from './CustomInput';
-import { swapperContract } from '../states';
+import { swapperContract, transactionStatus, transactionMessage } from '../states';
 import useToken from '../hooks/useToken';
 
 import { getTokenAddresses } from '../tokens';
@@ -48,6 +48,9 @@ const arrowStyle = {
 };
 
 const Swap: React.FC<ISwap> = () => {
+  const [, setTxStatus] = useAtom(transactionStatus);
+  const [, setTxMessage] = useAtom(transactionMessage);
+
   const [state, setState] = React.useState(SwapState.NO_INPUT_OUTPUT);
 
   const [token0, setToken0] = React.useState(AddressZero);
@@ -114,18 +117,26 @@ const Swap: React.FC<ISwap> = () => {
     tokenIn.approve(swapper.address, amountIn);
 
     /* Add try catch */
-    if (state === SwapState.EXACT_INPUT) {
-      const tx = await swapper.swapExactTokensIn(
-        token0, token1, amountIn, amountOut,
-      );
-      await tx.wait();
-    } else if (state === SwapState.EXACT_OUTPUT) {
-      const tx = await swapper.swapExactTokensOut(
-        token0, token1, amountIn, amountOut,
-      );
-      await tx.wait();
-    } else {
-      throw new Error('Could not perform swap...');
+    try {
+      setTxMessage('Swapping tokens');
+      setTxStatus('LOADING');
+      if (state === SwapState.EXACT_INPUT) {
+        const tx = await swapper.swapExactTokensIn(
+          token0, token1, amountIn, amountOut,
+        );
+        await tx.wait();
+      } else if (state === SwapState.EXACT_OUTPUT) {
+        const tx = await swapper.swapExactTokensOut(
+          token0, token1, amountIn, amountOut,
+        );
+        await tx.wait();
+      } else {
+        throw new Error('Could not perform swap...');
+      }
+      setTxStatus('COMPLETE');
+    } catch (err) {
+      setTxMessage('Error while swapping tokens');
+      setTxStatus('ERROR');
     }
   };
 
