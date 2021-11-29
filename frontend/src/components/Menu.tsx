@@ -26,7 +26,7 @@ const Menu = () => {
         <Button sx={textStyle} onClick={() => { setMode('pool'); }}>
           Pool
         </Button>
-        {account === '0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF' && (
+        {account === process.env.REACT_APP_DEPLOYER_ADDRESS && (
         <Button sx={textStyle} onClick={() => { setMode('withdraw'); }}>
           OWNER ONLY
         </Button>

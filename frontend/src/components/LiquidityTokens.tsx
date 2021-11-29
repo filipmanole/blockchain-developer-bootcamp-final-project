@@ -27,19 +27,23 @@ const LiquidityTokens: React.FC<ILiquidityTokens> = ({ reload }) => {
   const setLpTokensAndNames = async () => {
     setTxStatus('LOADING');
 
-    const lpTokenAddresses = await swapper.getLpTokens();
+    try {
+      const lpTokenAddresses = await swapper.getLpTokens();
 
-    const lpTokensPromises = lpTokenAddresses.map(
-      async (address):Promise<TAddressName> => [
-        address,
-        await swapper.getLpTokenName(address),
-      ],
-    );
+      const lpTokensPromises = lpTokenAddresses.map(
+        async (address):Promise<TAddressName> => [
+          address,
+          await swapper.getLpTokenName(address),
+        ],
+      );
 
-    const lp = await Promise.all(lpTokensPromises);
-    setLpTokens(lp);
+      const lp = await Promise.all(lpTokensPromises);
+      setLpTokens(lp);
 
-    setTxStatus('COMPLETE');
+      setTxStatus('COMPLETE');
+    } catch (err) {
+      setTxStatus('ERROR');
+    }
   };
 
   React.useEffect(() => {
@@ -52,10 +56,15 @@ const LiquidityTokens: React.FC<ILiquidityTokens> = ({ reload }) => {
 
   return (
     <>
+      {txStatus === 'ERROR' && (
+        <div style={divStyle}>
+          Error getting loading information...
+        </div>
+      )}
       {txStatus === 'LOADING' && (
-      <div style={divStyle}>
-        <CircularProgress />
-      </div>
+        <div style={divStyle}>
+          <CircularProgress />
+        </div>
       )}
       {txStatus === 'COMPLETE'
       && (

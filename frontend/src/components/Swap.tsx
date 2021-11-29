@@ -51,6 +51,8 @@ const Swap: React.FC<ISwap> = () => {
   const [, setTxStatus] = useAtom(transactionStatus);
   const [, setTxMessage] = useAtom(transactionMessage);
 
+  const [errInput, setErrInput] = React.useState<boolean>(false);
+
   const [state, setState] = React.useState(SwapState.NO_INPUT_OUTPUT);
 
   const [token0, setToken0] = React.useState(AddressZero);
@@ -164,31 +166,38 @@ const Swap: React.FC<ISwap> = () => {
   React.useEffect(() => {
     if (!tokenIn.usable || !tokenOut.usable) return;
     if (state !== SwapState.EXACT_INPUT) return;
-    if (amount0 === '') return;
+    if (amount0 === '') { setErrInput(false); return; }
 
     const amountIn = tokenIn.expand(amount0);
     const path: string[] = [token0, token1];
-    swapper.getAmountsOut(amountIn, path).then((amounts) => {
-      setAmount1(tokenOut.shrink(amounts[1]));
-    });
+    swapper.getAmountsOut(amountIn, path)
+      .then((amounts) => {
+        setErrInput(false);
+        setAmount1(tokenOut.shrink(amounts[1]));
+      })
+      .catch(() => { setErrInput(true); });
   }, [amount0]);
 
   React.useEffect(() => {
     if (!tokenIn.usable || !tokenOut.usable) return;
     if (state !== SwapState.EXACT_OUTPUT) return;
-    if (amount1 === '') return;
+    if (amount1 === '') { setErrInput(false); return; }
 
     const amountOut = tokenOut.expand(amount1);
     const path: string[] = [token0, token1];
-    swapper.getAmountsIn(amountOut, path).then((amounts) => {
-      setAmount0(tokenOut.shrink(amounts[0]));
-    });
+    swapper.getAmountsIn(amountOut, path)
+      .then((amounts) => {
+        setErrInput(false);
+        setAmount0(tokenOut.shrink(amounts[0]));
+      })
+      .catch(() => { setErrInput(true); });
   }, [amount1]);
 
   return (
     <div id="swap-pool-window">
       <div id="swap-pool-inputs">
         <CustomInput
+          badInput={errInput}
           tokens={
             tokens.filter(
               (token) => token !== token0 && token !== token1,
@@ -201,6 +210,7 @@ const Swap: React.FC<ISwap> = () => {
           onInputChange={onAmount0Change}
         />
         <CustomInput
+          badInput={errInput}
           tokens={
             tokens.filter(
               (token) => token !== token0 && token !== token1,
@@ -224,7 +234,7 @@ const Swap: React.FC<ISwap> = () => {
 
       <div>
         <Button
-          disabled={tokensNotSelected() || amountNotEntered()}
+          disabled={errInput || tokensNotSelected() || amountNotEntered()}
           onClick={swap}
           sx={button}
           fullWidth
