@@ -27,7 +27,11 @@ export default {
           balance: "100000000000000000000",
         },
       ]
-    }
+    },
+    rinkeby: {
+      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+      accounts: [`${process.env.DEPLOYER_PRIVATE_KEY}`]
+    },
   },
   solidity: {
     version: "0.8.9",
@@ -56,4 +60,3 @@ export default {
     ],
   },
 }
-
