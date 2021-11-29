@@ -17,7 +17,7 @@ contract DummyToken is ERC20 {
   }
 
   ///@notice this function should mint 1000 tokens into the msg.sender balance
-  function mint() public {
+  function mintOnlyOnce() public {
     require(minted[msg.sender] == false, "User already minted these tokens");
     minted[msg.sender] = true;
     _mint(msg.sender, 1000 * 10**decimals());

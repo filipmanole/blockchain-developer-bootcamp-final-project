@@ -40,7 +40,7 @@ describe("DummyToken Contract", () => {
 
   it("should mint 1000 tokens", async () => {
 
-    tx = await dummyToken.connect(user).mint();
+    tx = await dummyToken.connect(user).mintOnlyOnce();
     await tx.wait();
 
     const balance = await dummyToken.balanceOf(user.address);
@@ -53,6 +53,6 @@ describe("DummyToken Contract", () => {
   });
 
   it("should revert when tying to mint another 1000 tokens", async () => {
-    await expect(dummyToken.connect(user).mint()).to.be.reverted;
+    await expect(dummyToken.connect(user).mintOnlyOnce()).to.be.reverted;
   });
 });
