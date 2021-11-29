@@ -6,6 +6,7 @@ import './CustomInput.css';
 import { TOKENS } from '../tokens';
 
 export interface ICustomInput<T=string> {
+  badInput?:boolean,
   tokens: T[],
   token: T,
   amount: string,
@@ -23,6 +24,7 @@ const boxStyle = {
 };
 
 export const CustomInput: React.FC<ICustomInput> = ({
+  badInput,
   tokens,
   token,
   amount,
@@ -39,7 +41,7 @@ export const CustomInput: React.FC<ICustomInput> = ({
 
   return (
     <Box
-      sx={boxStyle}
+      sx={{ ...boxStyle, bgcolor: badInput ? 'warning.main' : 'secondary.main' }}
     >
       <Button
         onClick={handleOpen}
