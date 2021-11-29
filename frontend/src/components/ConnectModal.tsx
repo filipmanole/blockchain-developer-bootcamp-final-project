@@ -69,7 +69,11 @@ const ConnectModal: React.FC<IConnectModal> = () => {
     if (active) {
       const signer = library.getSigner(account).connectUnchecked();
       setSigner(signer);
-      setSwapper(Swapper__factory.connect('0x153b84F377C6C7a7D93Bd9a717E48097Ca6Cfd11', signer as Signer));
+      setSwapper(
+        Swapper__factory.connect(
+          process.env.REACT_APP_SWAPPER_ADDRESS, signer as Signer,
+        ),
+      );
     }
   },
   [account]);
