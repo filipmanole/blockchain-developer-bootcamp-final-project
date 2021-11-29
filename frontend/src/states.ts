@@ -23,3 +23,6 @@ export const transactionMessage = atom('');
 export const appError = atom(false);
 
 export const slippageSetting = atom(0.1);
+
+type TAccountPage = 'main' | 'token';
+export const accountPageState = atom('main' as TAccountPage);
