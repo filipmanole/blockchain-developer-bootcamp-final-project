@@ -4,9 +4,10 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useAtom } from 'jotai';
 import { AddressZero } from '@ethersproject/constants';
 import { CustomInput } from './CustomInput';
-import { swapperContract } from '../states';
-import IToken from '../types/IToken';
+import { swapperContract, transactionStatus, transactionMessage } from '../states';
 import useToken from '../hooks/useToken';
+
+import { getTokenAddresses } from '../tokens';
 
 import './SwapPool.css';
 
@@ -19,18 +20,7 @@ enum SwapState {
   EXACT_OUTPUT,
 }
 
-const tokens: IToken[] = [
-  {
-    name: 'DummyToken0',
-    symbol: 'DT0',
-    address: '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b',
-  },
-  {
-    name: 'DummyToken1',
-    symbol: 'DT1',
-    address: '0x2946259E0334f33A064106302415aD3391BeD384',
-  },
-];
+const tokens = getTokenAddresses();
 
 const button = {
   borderRadius: 3,
@@ -57,23 +47,22 @@ const arrowStyle = {
   zIndex: 2,
 };
 
-const defaultToken: IToken = {
-  name: '',
-  symbol: '',
-  address: AddressZero,
-};
-
 const Swap: React.FC<ISwap> = () => {
+  const [, setTxStatus] = useAtom(transactionStatus);
+  const [, setTxMessage] = useAtom(transactionMessage);
+
+  const [errInput, setErrInput] = React.useState<boolean>(false);
+
   const [state, setState] = React.useState(SwapState.NO_INPUT_OUTPUT);
 
-  const [token0, setToken0] = React.useState(defaultToken);
-  const [token1, setToken1] = React.useState(defaultToken);
+  const [token0, setToken0] = React.useState(AddressZero);
+  const [token1, setToken1] = React.useState(AddressZero);
 
   const [amount0, setAmount0] = React.useState('');
   const [amount1, setAmount1] = React.useState('');
 
-  const tokenIn = useToken(token0.address);
-  const tokenOut = useToken(token1.address);
+  const tokenIn = useToken(token0);
+  const tokenOut = useToken(token1);
 
   const [swapper] = useAtom(swapperContract);
 
@@ -110,8 +99,8 @@ const Swap: React.FC<ISwap> = () => {
   };
 
   const tokensNotSelected = ():boolean => {
-    if (token0.address === AddressZero) return true;
-    if (token1.address === AddressZero) return true;
+    if (token0 === AddressZero) return true;
+    if (token1 === AddressZero) return true;
 
     return false;
   };
@@ -130,18 +119,26 @@ const Swap: React.FC<ISwap> = () => {
     tokenIn.approve(swapper.address, amountIn);
 
     /* Add try catch */
-    if (state === SwapState.EXACT_INPUT) {
-      const tx = await swapper.swapExactTokensIn(
-        token0.address, token1.address, amountIn, amountOut,
-      );
-      await tx.wait();
-    } else if (state === SwapState.EXACT_OUTPUT) {
-      const tx = await swapper.swapExactTokensOut(
-        token0.address, token1.address, amountIn, amountOut,
-      );
-      await tx.wait();
-    } else {
-      throw new Error('Could not perform swap...');
+    try {
+      setTxMessage('Swapping tokens');
+      setTxStatus('LOADING');
+      if (state === SwapState.EXACT_INPUT) {
+        const tx = await swapper.swapExactTokensIn(
+          token0, token1, amountIn, amountOut,
+        );
+        await tx.wait();
+      } else if (state === SwapState.EXACT_OUTPUT) {
+        const tx = await swapper.swapExactTokensOut(
+          token0, token1, amountIn, amountOut,
+        );
+        await tx.wait();
+      } else {
+        throw new Error('Could not perform swap...');
+      }
+      setTxStatus('COMPLETE');
+    } catch (err) {
+      setTxMessage('Error while swapping tokens');
+      setTxStatus('ERROR');
     }
   };
 
@@ -169,34 +166,41 @@ const Swap: React.FC<ISwap> = () => {
   React.useEffect(() => {
     if (!tokenIn.usable || !tokenOut.usable) return;
     if (state !== SwapState.EXACT_INPUT) return;
-    if (amount0 === '') return;
+    if (amount0 === '') { setErrInput(false); return; }
 
     const amountIn = tokenIn.expand(amount0);
-    const path: string[] = [token0.address, token1.address];
-    swapper.getAmountsOut(amountIn, path).then((amounts) => {
-      setAmount1(tokenOut.shrink(amounts[1]));
-    });
+    const path: string[] = [token0, token1];
+    swapper.getAmountsOut(amountIn, path)
+      .then((amounts) => {
+        setErrInput(false);
+        setAmount1(tokenOut.shrink(amounts[1]));
+      })
+      .catch(() => { setErrInput(true); });
   }, [amount0]);
 
   React.useEffect(() => {
     if (!tokenIn.usable || !tokenOut.usable) return;
     if (state !== SwapState.EXACT_OUTPUT) return;
-    if (amount1 === '') return;
+    if (amount1 === '') { setErrInput(false); return; }
 
     const amountOut = tokenOut.expand(amount1);
-    const path: string[] = [token0.address, token1.address];
-    swapper.getAmountsIn(amountOut, path).then((amounts) => {
-      setAmount0(tokenOut.shrink(amounts[0]));
-    });
+    const path: string[] = [token0, token1];
+    swapper.getAmountsIn(amountOut, path)
+      .then((amounts) => {
+        setErrInput(false);
+        setAmount0(tokenOut.shrink(amounts[0]));
+      })
+      .catch(() => { setErrInput(true); });
   }, [amount1]);
 
   return (
     <div id="swap-pool-window">
       <div id="swap-pool-inputs">
         <CustomInput
+          badInput={errInput}
           tokens={
             tokens.filter(
-              (token) => token.address !== token0.address && token.address !== token1.address,
+              (token) => token !== token0 && token !== token1,
             )
           }
           token={token0}
@@ -206,9 +210,10 @@ const Swap: React.FC<ISwap> = () => {
           onInputChange={onAmount0Change}
         />
         <CustomInput
+          badInput={errInput}
           tokens={
             tokens.filter(
-              (token) => token.address !== token0.address && token.address !== token1.address,
+              (token) => token !== token0 && token !== token1,
             )
           }
           token={token1}
@@ -229,7 +234,7 @@ const Swap: React.FC<ISwap> = () => {
 
       <div>
         <Button
-          disabled={tokensNotSelected() || amountNotEntered()}
+          disabled={errInput || tokensNotSelected() || amountNotEntered()}
           onClick={swap}
           sx={button}
           fullWidth

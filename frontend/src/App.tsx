@@ -12,8 +12,8 @@ import { useAtom } from 'jotai';
 import { appTheme } from './states';
 
 import WalletConnect from './components/WalletConnect';
-
 import Dashboard from './components/Dashboard';
+import ErrorModal from './components/ErrorModal';
 
 import './App.css';
 
@@ -45,6 +45,7 @@ const App = () => {
           </Paper>
           <Dashboard />
         </div>
+        <ErrorModal />
       </Web3ReactProvider>
     </ThemeProvider>
   );

@@ -4,9 +4,17 @@ import { useWeb3React } from '@web3-react/core';
 import { useAtom } from 'jotai';
 import { Signer } from 'ethers';
 import { Button, Box, Modal } from '@mui/material';
-import { swapperContract, signerAccount, connectModalState } from '../states';
+import {
+  swapperContract, signerAccount, connectModalState, accountPageState,
+} from '../states';
 import { Swapper__factory } from '../typechain';
 
+import SlippageSelect from './SlippageSelect';
+import LiquidityTokens from './LiquidityTokens';
+import AccountMenu from './AccountMenu';
+import ERC20TokenInfo from './ERC20TokenInfo';
+
+import { getTokenAddresses } from '../tokens';
 import injected from '../connectors';
 
 interface IConnectModal {
@@ -25,7 +33,8 @@ const modalStyle = {
 
   display: 'grid',
   gridAutoRows: 'auto',
-  justifyItems: 'center',
+  justifyContent: 'center',
+  alignItems: 'center',
   rowGap: '10px',
 };
 
@@ -37,6 +46,7 @@ const buttonStyle = {
 };
 
 const ConnectModal: React.FC<IConnectModal> = () => {
+  const [accountPage] = useAtom(accountPageState);
   const [modalState, setModalState] = useAtom(connectModalState);
   const [, setSwapper] = useAtom(swapperContract);
   const [, setSigner] = useAtom(signerAccount);
@@ -45,7 +55,11 @@ const ConnectModal: React.FC<IConnectModal> = () => {
   } = useWeb3React();
 
   const connect = async () => {
-    await activate(injected); /* TODO handle exception */
+    try {
+      await activate(injected); /* TODO handle exception */
+    } catch (err) {
+      console.log('???');
+    }
   };
   const deconnect = () => {
     deactivate();
@@ -55,7 +69,11 @@ const ConnectModal: React.FC<IConnectModal> = () => {
     if (active) {
       const signer = library.getSigner(account).connectUnchecked();
       setSigner(signer);
-      setSwapper(Swapper__factory.connect('0x153b84F377C6C7a7D93Bd9a717E48097Ca6Cfd11', signer as Signer));
+      setSwapper(
+        Swapper__factory.connect(
+          process.env.REACT_APP_SWAPPER_ADDRESS, signer as Signer,
+        ),
+      );
     }
   },
   [account]);
@@ -72,19 +90,46 @@ const ConnectModal: React.FC<IConnectModal> = () => {
         sx={modalStyle}
       >
         {
-      active
-        ? (
-          <>
-            <h3 style={{ fontFamily: 'Monospace' }}>{account}</h3>
-            <Button fullWidth sx={buttonStyle} onClick={() => { deconnect(); setModalState(false); }} variant="contained"> Deconnect </Button>
-          </>
-        ) : (
-          <>
-            <h3 style={{ fontFamily: 'Monospace' }}>Not Connected</h3>
-            <Button fullWidth sx={buttonStyle} onClick={() => { connect(); setModalState(false); }} variant="contained"> Connect </Button>
-          </>
-        )
-    }
+          active
+            ? (
+              <>
+                <h3 style={{ fontFamily: 'Monospace' }}>{account}</h3>
+                <AccountMenu />
+                {accountPage === 'main' && (
+                  <>
+                    <div
+                      style={{
+                        display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center',
+                      }}
+                    >
+                      <div style={{ fontFamily: 'Monospace' }}> Slippage </div>
+                      <SlippageSelect />
+                    </div>
+                    <hr />
+                    <LiquidityTokens reload={modalState} />
+                    <hr />
+                  </>
+                )}
+
+                {
+                  accountPage === 'token' && (
+                    getTokenAddresses()
+                      .map((address, i) => (
+                        /* eslint-disable-next-line */
+                        <ERC20TokenInfo key={i} reload={modalState} tokenAddress={address} />
+                      ))
+                  )
+                }
+
+                <Button fullWidth sx={buttonStyle} onClick={() => { deconnect(); setModalState(false); }} variant="contained"> Deconnect </Button>
+              </>
+            ) : (
+              <>
+                <h3 style={{ fontFamily: 'Monospace' }}>Not Connected</h3>
+                <Button fullWidth sx={buttonStyle} onClick={() => { connect(); setModalState(false); }} variant="contained"> Connect </Button>
+              </>
+            )
+        }
       </Box>
     </Modal>
   );

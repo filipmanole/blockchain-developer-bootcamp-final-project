@@ -8,7 +8,9 @@ import { appMode } from '../states';
 import Swap from './Swap';
 import Pool from './Pool';
 import Menu from './Menu';
+import Withdraw from './Withdraw';
 import Signature from './Signature';
+import TxStatus from './TxStatus';
 
 import injected from '../connectors';
 
@@ -48,34 +50,29 @@ const Dashboard = () => {
   const { active, activate } = useWeb3React();
 
   return (
-    <Paper sx={dashboardStyle}>
-      {
-        !active && (
-          <Paper sx={connectStyle}>
-            <Button
-              sx={buttonStyle}
-              variant="contained"
-              onClick={() => activate(injected)}
-            >
-              Connect to Metamask
-            </Button>
-          </Paper>
-        )
-      }
-      <Menu />
-      {mode === 'swap' && <Swap />}
-      {mode === 'pool' && <Pool />}
-      {mode === 'withdraw' && (
-      <Button
-        sx={buttonStyle}
-        variant="contained"
-        fullWidth
-      >
-        Withdraw
-      </Button>
-      )}
+    <>
+      <Paper sx={dashboardStyle}>
+        {
+          !active && (
+            <Paper sx={connectStyle}>
+              <Button
+                sx={buttonStyle}
+                variant="contained"
+                onClick={() => activate(injected)}
+              >
+                Connect to Metamask
+              </Button>
+            </Paper>
+          )
+        }
+        <TxStatus />
+        <Menu />
+        {mode === 'swap' && <Swap />}
+        {mode === 'pool' && <Pool />}
+        {mode === 'withdraw' && <Withdraw />}
+      </Paper>
       <Signature />
-    </Paper>
+    </>
   );
 };
 

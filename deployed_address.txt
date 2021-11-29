@@ -1,0 +1,7 @@
+Rinkeby Network
+
+Swapper: 0x06a61dd7C52F11388e085Eb9b4B7223caE15BBE9
+
+Dummy tokens contracts
+DT0    : 0xB83A3DCeBF2ced779682Ce04a1fc1DeFf7F5D314
+DT1    : 0x87Df8c8d5115f2F1D432eC65f935Ab1383dd9b8C
