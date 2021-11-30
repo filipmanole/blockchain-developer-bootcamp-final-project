@@ -35,8 +35,8 @@ jobs:
           npm ci --ignore-scripts
           npm run build
         env:
-          REACT_APP_DEPLOYER_ADDRESS: 0x6E0a4931AF9f11df3c6Fce72454d1d9718C002AC
-          REACT_APP_SWAPPER_ADDRESS: 0x06a61dd7C52F11388e085Eb9b4B7223caE15BBE9
+          REACT_APP_DEPLOYER_ADDRESS: '0x6E0a4931AF9f11df3c6Fce72454d1d9718C002AC'
+          REACT_APP_SWAPPER_ADDRESS: '0x06a61dd7C52F11388e085Eb9b4B7223caE15BBE9'
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
