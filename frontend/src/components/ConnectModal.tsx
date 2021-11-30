@@ -55,11 +55,7 @@ const ConnectModal: React.FC<IConnectModal> = () => {
   } = useWeb3React();
 
   const connect = async () => {
-    try {
-      await activate(injected); /* TODO handle exception */
-    } catch (err) {
-      console.log('???');
-    }
+    await activate(injected);
   };
   const deconnect = () => {
     deactivate();
