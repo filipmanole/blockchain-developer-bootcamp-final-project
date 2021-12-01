@@ -7,6 +7,7 @@ import { ContractTransaction } from '@ethersproject/contracts';
 import { DummyToken } from '../typechain';
 import { DummyToken__factory } from '../typechain/factories/DummyToken__factory';
 
+/* Unit tests, covering minting tokens only one time per account */
 
 describe("DummyToken Contract", () => {
   /* Actors for the tests */

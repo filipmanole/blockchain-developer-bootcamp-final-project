@@ -33,6 +33,7 @@ const main = async () => {
   const SwapperContractFactory = new Swapper__factory(owner);
   const swapper = await SwapperContractFactory.deploy(uniswapV2Factory.address, uniswapV2Router.address);
 
+  console.log("Swapper deployer   :", owner.address);
   console.log("Swapper deployed to:", swapper.address);
   console.log("DT0     deployed to:", DT0.address);
   console.log("DT1     deployed to:", DT1.address);
