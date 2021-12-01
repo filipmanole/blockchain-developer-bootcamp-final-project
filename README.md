@@ -12,9 +12,11 @@ The application is build using popular tools like `React`, `hardhat`, `ethers` a
 
 ## Directory structure
 
-The root of the repository has two important directories:
-- **`hardhat`** containing solidity contracts and unit tests;
-- **`frontend`** containing the React web application
+- [**hardhat**](hardhat): directory containing [**contracts**](hardhat/contracts), [**unit tests**](hardhat/test), [**deploy scripts**](hardhat/scripts)
+- [**frontend**](frontend): directory containing the React application
+- [**avoiding_common_attacks.md**](avoiding_common_attacks.md)
+- [**deployed_address.txt**](deployed_address.txt)
+- [**design_pattern_decisions.md**](design_pattern_decisions.md)
 
 ## Compile smart contracts and run unit tests
 
