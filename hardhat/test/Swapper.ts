@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { Swapper, Swapper__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Router02, UniswapV2Router02__factory, IUniswapV2Pair, IUniswapV2Pair__factory, IERC20, IERC20__factory } from '../typechain';
+import { Swapper, Swapper__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Router02__factory, IUniswapV2Pair__factory, IERC20__factory } from '../typechain';
 import { BigNumber } from '@ethersproject/bignumber';
 import { ERC20PresetMinterPauser } from '../typechain/ERC20PresetMinterPauser';
 import { ERC20PresetMinterPauser__factory } from '../typechain/factories/ERC20PresetMinterPauser__factory';
@@ -10,6 +10,8 @@ import { ContractTransaction } from '@ethersproject/contracts';
 import { WETH9__factory } from '../typechain/factories/WETH9__factory';
 import { WETH9 } from '../typechain/WETH9';
 
+/* Unit tests, covering providing liquidity into the pool, swapping
+tokens, fee withdraw, and removing liquidity from the pool */
 
 describe("Swapper Contract", () => {
   /* Actors for the tests */
