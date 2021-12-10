@@ -116,7 +116,7 @@ const Swap: React.FC<ISwap> = () => {
 
     const amountIn = tokenIn.expand(amount0);
     const amountOut = tokenOut.expand(amount1);
-    tokenIn.approve(swapper.address, amountIn);
+    await tokenIn.approve(swapper.address, amountIn);
 
     /* Add try catch */
     try {
