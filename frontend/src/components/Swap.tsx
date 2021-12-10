@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import { Button, Box, ButtonBase } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -116,7 +117,7 @@ const Swap: React.FC<ISwap> = () => {
 
     const amountIn = tokenIn.expand(amount0);
     const amountOut = tokenOut.expand(amount1);
-    tokenIn.approve(swapper.address, amountIn);
+    await tokenIn.approve(swapper.address, amountIn);
 
     /* Add try catch */
     try {
