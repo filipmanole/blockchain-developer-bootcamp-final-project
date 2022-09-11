@@ -1,5 +1,7 @@
 # Swapper
 
+Blog post containing a shor overview: [https://filipmanole.com/how-i-built-my-own-decentralized-exchange-dex](https://filipmanole.com/how-i-built-my-own-decentralized-exchange-dex)
+
 Ethereum address: 0xa9fe8dBBa511cD5d1063D0862Fb0D24C4ac47233
 
 Application link: [https://filipmanole.github.io/blockchain-developer-bootcamp-final-project/](https://filipmanole.github.io/blockchain-developer-bootcamp-final-project/)
